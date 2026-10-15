@@ -1,0 +1,952 @@
+<title>Spoty Widget Preview</title>
+<meta name="description" content="Out-of-game preview of the Spoty Widget HUD designs, ported from WidgetRenderer.java.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control rail on the left, the game screen as the hero, a close-up strip of all five designs, then notes. */
+:root {
+  --bg: #101216;
+  --panel: #171a20;
+  --panel-2: #1e222a;
+  --line: #2a2e37;
+  --fg: #e6e8ec;
+  --muted: #9097a3;
+  --accent: #e8b04b;
+  --accent-ink: #1a1408;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font-family: var(--font-body); font-size: 14px; line-height: 1.5; padding-inline: 16px; padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-block: 20px 16px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+h1 { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); }
+h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0; text-wrap: balance; }
+.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+aside { display: flex; flex-direction: column; gap: 14px; position: sticky; top: env(safe-area-inset-top, 0px); max-height: 100vh; overflow-y: auto; padding-block: 4px 16px; }
+@media (max-width: 900px) { aside { position: static; max-height: none; } }
+fieldset { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); margin: 0; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+legend { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 6px; }
+label.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+label.stack { display: flex; flex-direction: column; gap: 4px; }
+.val { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+select, input[type="text"], textarea { width: 100%; background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
+textarea { resize: vertical; min-height: 64px; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.seg button { text-align: left; }
+button { font: inherit; font-weight: 500; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+button:hover { border-color: var(--muted); }
+button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hint { color: var(--muted); font-size: 12px; margin: 0; }
+
+main { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; margin-bottom: 10px; }
+.stage { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #000; line-height: 0; }
+.stage canvas { width: 100%; height: auto; display: block; }
+.closeups { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 12px; }
+.closeup { display: flex; flex-direction: column; gap: 8px; padding: 10px; text-align: left; border-radius: 8px; background: var(--panel); }
+.closeup canvas { width: 100%; height: auto; image-rendering: pixelated; border-radius: 4px; display: block; }
+.closeup[aria-pressed="true"] { background: var(--panel); color: var(--fg); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.closeup .name { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+.closeup .name span:last-child { font-weight: 400; color: var(--muted); font-size: 12px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.notes label { font-weight: 600; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+#copyStatus { color: var(--muted); }
+#copyOut { font-family: var(--font-mono); font-size: 12px; min-height: 160px; margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Spoty Widget Preview</h1>
+    <p>Every HUD design, drawn with the same layout maths, colours and pixel font as <code>WidgetRenderer.java</code>.</p>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <fieldset>
+        <legend>Design</legend>
+        <div class="seg" id="layoutSeg" role="group" aria-label="Design"></div>
+        <button id="replay" type="button">Replay slide-in</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Placement</legend>
+        <label class="stack">Corner
+          <select id="corner">
+            <option value="TOP_LEFT">Top left</option>
+            <option value="TOP_RIGHT">Top right</option>
+            <option value="BOTTOM_LEFT">Bottom left</option>
+            <option value="BOTTOM_RIGHT">Bottom right</option>
+          </select>
+        </label>
+        <label class="stack">Scale
+          <select id="scale">
+            <option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1" selected>1.00x</option>
+            <option value="1.25">1.25x</option><option value="1.5">1.50x</option><option value="2">2.00x</option>
+          </select>
+        </label>
+        <div class="two">
+          <label class="stack">Offset X <span class="val" id="offsetXVal"></span><input type="range" id="offsetX" min="0" max="100" value="6"></label>
+          <label class="stack">Offset Y <span class="val" id="offsetYVal"></span><input type="range" id="offsetY" min="0" max="100" value="6"></label>
+        </div>
+        <label class="stack">Background <span class="val" id="opacityVal"></span><input type="range" id="opacity" min="0" max="100" value="88"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Show</legend>
+        <label class="row">Album art <input type="checkbox" id="showArt" checked></label>
+        <label class="row">Timestamps <input type="checkbox" id="showTime" checked></label>
+        <label class="row">Equaliser bars <input type="checkbox" id="showBars" checked></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Track</legend>
+        <label class="stack">Example
+          <select id="preset"></select>
+        </label>
+        <label class="stack">Title <input type="text" id="title"></label>
+        <label class="stack">Artist <input type="text" id="artist"></label>
+        <label class="row">Playing <input type="checkbox" id="playing" checked></label>
+        <label class="stack">Position <span class="val" id="posVal"></span><input type="range" id="pos" min="0" max="1000" value="420"></label>
+        <label class="stack">Cover
+          <select id="cover">
+            <option value="sunset">Sunset</option>
+            <option value="ocean">Ocean</option>
+            <option value="neon">Neon</option>
+            <option value="paper">Paper</option>
+            <option value="upload">My image</option>
+            <option value="loading">Still loading</option>
+            <option value="record">Jukebox record</option>
+          </select>
+        </label>
+        <label class="stack">Use your own cover <input type="file" id="upload" accept="image/*"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>World</legend>
+        <label class="stack">Scene
+          <select id="scene">
+            <option value="plains">Plains, day</option>
+            <option value="night">Plains, night</option>
+            <option value="snow">Snowfield</option>
+            <option value="desert">Desert</option>
+            <option value="cave">Cave</option>
+            <option value="nether">Nether</option>
+          </select>
+        </label>
+        <div class="two">
+          <label class="stack">Window
+            <select id="res">
+              <option value="1280x720">1280×720</option>
+              <option value="1920x1080" selected>1920×1080</option>
+              <option value="2560x1440">2560×1440</option>
+            </select>
+          </label>
+          <label class="stack">GUI scale
+            <select id="gui">
+              <option value="0">Auto</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            </select>
+          </label>
+        </div>
+        <label class="row">Survival HUD (hearts, XP) <input type="checkbox" id="survival" checked></label>
+        <label class="row">Held item name <input type="checkbox" id="itemName" checked></label>
+      </fieldset>
+    </aside>
+
+    <main>
+      <section>
+        <div class="section-head">
+          <h2>In game</h2>
+          <span class="val" id="stageInfo"></span>
+        </div>
+        <div class="stage"><canvas id="stage" width="1920" height="1080"></canvas></div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>All designs, close up</h2>
+          <span class="hint">3× pixels. Click one to show it in game.</span>
+        </div>
+        <div class="closeups" id="closeups"></div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Notes for Claude</h2>
+          <span class="hint">Write what to change, then copy and paste it into Claude Code. Your current settings are added.</span>
+        </div>
+        <div class="notes" id="notes"></div>
+        <div class="actions">
+          <button class="primary" id="copy" type="button">Copy feedback</button>
+          <button id="clearNotes" type="button">Clear notes</button>
+          <span id="copyStatus" role="status"></span>
+        </div>
+        <textarea id="copyOut" readonly hidden aria-label="Feedback text"></textarea>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+// ---- Minecraft-style pixel font (glyph advance = width + 1, like Font.width) ----------------
+const GLYPHS = {
+  " ": "...|...|...|...|...|...|...",
+  "A": ".###.|#...#|#...#|#####|#...#|#...#|#...#", "B": "####.|#...#|####.|#...#|#...#|#...#|####.",
+  "C": ".###.|#...#|#....|#....|#....|#...#|.###.", "D": "####.|#...#|#...#|#...#|#...#|#...#|####.",
+  "E": "#####|#....|###..|#....|#....|#....|#####", "F": "#####|#....|###..|#....|#....|#....|#....",
+  "G": ".####|#....|#..##|#...#|#...#|#...#|.###.", "H": "#...#|#...#|#####|#...#|#...#|#...#|#...#",
+  "I": "###|.#.|.#.|.#.|.#.|.#.|###", "J": "....#|....#|....#|....#|....#|#...#|.###.",
+  "K": "#...#|#..#.|###..|#..#.|#...#|#...#|#...#", "L": "#....|#....|#....|#....|#....|#....|#####",
+  "M": "#...#|##.##|#.#.#|#...#|#...#|#...#|#...#", "N": "#...#|##..#|#.#.#|#..##|#...#|#...#|#...#",
+  "O": ".###.|#...#|#...#|#...#|#...#|#...#|.###.", "P": "####.|#...#|####.|#....|#....|#....|#....",
+  "Q": ".###.|#...#|#...#|#...#|#...#|#..#.|.##.#", "R": "####.|#...#|####.|#...#|#...#|#...#|#...#",
+  "S": ".####|#....|.###.|....#|....#|#...#|.###.", "T": "#####|..#..|..#..|..#..|..#..|..#..|..#..",
+  "U": "#...#|#...#|#...#|#...#|#...#|#...#|.###.", "V": "#...#|#...#|#...#|#...#|.#.#.|.#.#.|..#..",
+  "W": "#...#|#...#|#...#|#...#|#.#.#|##.##|#...#", "X": "#...#|.#.#.|..#..|.#.#.|#...#|#...#|#...#",
+  "Y": "#...#|.#.#.|..#..|..#..|..#..|..#..|..#..", "Z": "#####|....#|...#.|..#..|.#...|#....|#####",
+  "a": ".....|.....|.###.|....#|.####|#...#|.####", "b": "#....|#....|#.##.|##..#|#...#|#...#|####.",
+  "c": ".....|.....|.###.|#...#|#....|#...#|.###.", "d": "....#|....#|.##.#|#..##|#...#|#...#|.####",
+  "e": ".....|.....|.###.|#...#|#####|#....|.####", "f": "..##|.#..|####|.#..|.#..|.#..|.#..",
+  "g": ".....|.....|.####|#...#|#...#|.####|....#|####.", "h": "#....|#....|#.##.|##..#|#...#|#...#|#...#",
+  "i": "#|.|#|#|#|#|#", "j": "....#|.....|....#|....#|....#|#...#|#...#|.###.",
+  "k": "#...|#...|#..#|#.#.|##..|#.#.|#..#", "l": "#.|#.|#.|#.|#.|#.|.#",
+  "m": ".....|.....|##.#.|#.#.#|#.#.#|#...#|#...#", "n": ".....|.....|####.|#...#|#...#|#...#|#...#",
+  "o": ".....|.....|.###.|#...#|#...#|#...#|.###.", "p": ".....|.....|#.##.|##..#|#...#|####.|#....|#....",
+  "q": ".....|.....|.##.#|#..##|#...#|.####|....#|....#", "r": ".....|.....|#.##.|##..#|#....|#....|#....",
+  "s": ".....|.....|.####|#....|.###.|....#|####.", "t": ".#.|.#.|###|.#.|.#.|.#.|..#",
+  "u": ".....|.....|#...#|#...#|#...#|#...#|.####", "v": ".....|.....|#...#|#...#|#...#|.#.#.|..#..",
+  "w": ".....|.....|#...#|#...#|#.#.#|#.#.#|.####", "x": ".....|.....|#...#|.#.#.|..#..|.#.#.|#...#",
+  "y": ".....|.....|#...#|#...#|#...#|.####|....#|####.", "z": ".....|.....|#####|...#.|..#..|.#...|#####",
+  "0": ".###.|#...#|#..##|#.#.#|##..#|#...#|.###.", "1": "..#..|.##..|..#..|..#..|..#..|..#..|#####",
+  "2": ".###.|#...#|....#|..##.|.#...|#...#|#####", "3": ".###.|#...#|....#|..##.|....#|#...#|.###.",
+  "4": "...##|..#.#|.#..#|#...#|#####|....#|....#", "5": "#####|#....|####.|....#|....#|#...#|.###.",
+  "6": "..##.|.#...|#....|####.|#...#|#...#|.###.", "7": "#####|#...#|....#|...#.|..#..|..#..|..#..",
+  "8": ".###.|#...#|#...#|.###.|#...#|#...#|.###.", "9": ".###.|#...#|#...#|.####|....#|...#.|.##..",
+  ".": ".|.|.|.|.|.|#", ",": ".|.|.|.|.|.|#|#", ":": ".|#|.|.|.|.|#", ";": ".|#|.|.|.|.|#|#",
+  "-": ".....|.....|.....|#####|.....|.....|.....", "/": "....#|...#.|...#.|..#..|.#...|.#...|#....",
+  "·": ".|.|.|#|.|.|.", "'": "#|#|.|.|.|.|.", "!": "#|#|#|#|#|.|#",
+  "?": ".###.|#...#|....#|...#.|..#..|.....|..#..", "(": "..##|.#..|#...|#...|#...|.#..|..##",
+  ")": "##..|..#.|...#|...#|...#|..#.|##..", "&": "..#..|.#.#.|..#..|.##.#|#..#.|#..#.|.##.#",
+  "+": ".....|..#..|..#..|#####|..#..|..#..|.....", "\"": "#.#|#.#|...|...|...|...|...",
+  "[": "###|#..|#..|#..|#..|#..|###", "]": "###|..#|..#|..#|..#|..#|###", "_": ".....|.....|.....|.....|.....|.....|.....|#####",
+  "#": ".#.#.|.#.#.|#####|.#.#.|#####|.#.#.|.#.#.", "%": "#...#|#..#.|...#.|..#..|.#...|.#..#|#...#",
+  "$": "..#..|.####|#....|.###.|....#|####.|..#..", "*": ".....|#..#|.##.|#..#|.....|.....|.....",
+};
+const FONT = {};
+for (const [ch, src] of Object.entries(GLYPHS)) {
+  const rows = src.split("|");
+  const pixels = [];
+  rows.forEach((row, r) => { for (let c = 0; c < row.length; c++) if (row[c] === "#") pixels.push(c, r); });
+  FONT[ch] = { w: rows[0].length, pixels };
+}
+const glyph = ch => FONT[ch] || FONT[ch.normalize("NFD")[0]] || FONT["?"];
+
+// ---- Canvas wrapper mirroring compat/Canvas -------------------------------------------------
+function argb(rgb, a) { return (((Math.max(0, Math.min(255, a)) & 0xFF) << 24) | (rgb & 0xFFFFFF)) >>> 0; }
+function css(c) { return `rgba(${(c >>> 16) & 255},${(c >>> 8) & 255},${c & 255},${((c >>> 24) & 255) / 255})`; }
+
+class Canvas {
+  constructor(ctx, guiWidth, guiHeight, pixelsPerGui, statusBars) {
+    this.ctx = ctx; this.gw = guiWidth; this.gh = guiHeight; this.k = pixelsPerGui; this.s = pixelsPerGui;
+    this.statusBars = statusBars;
+  }
+  screenWidth() { return this.gw; }
+  screenHeight() { return this.gh; }
+  push(scale) { this.s = this.k * scale; }
+  pop() { this.s = this.k; }
+  rect(x, y, w, h, c) {
+    if (w <= 0 || h <= 0 || (c >>> 24) === 0) return;
+    const s = this.s;
+    const x0 = Math.round(x * s), y0 = Math.round(y * s), x1 = Math.round((x + w) * s), y1 = Math.round((y + h) * s);
+    this.ctx.fillStyle = css(c);
+    this.ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+  }
+  textWidth(v) { let w = 0; for (const ch of v) w += glyph(ch).w + 1; return w; }
+  trim(v, max) {
+    if (this.textWidth(v) <= max) return v;
+    const ellipsis = this.textWidth("...");
+    let out = "", w = 0;
+    for (const ch of v) {
+      const cw = this.textWidth(ch);
+      if (w + cw + ellipsis > max) break;
+      w += cw; out += ch;
+    }
+    return out + "...";
+  }
+  text(v, x, y, c, shadow) {
+    if (shadow) this.glyphs(v, x + 1, y + 1, ((((c & 0xFCFCFC) >>> 2) | (c & 0xFF000000)) >>> 0));
+    this.glyphs(v, x, y, c);
+  }
+  glyphs(v, x, y, c) {
+    if ((c >>> 24) === 0) return;
+    const ctx = this.ctx, s = this.s;
+    ctx.fillStyle = css(c);
+    let cx = x;
+    for (const ch of v) {
+      const g = glyph(ch);
+      for (let i = 0; i < g.pixels.length; i += 2) {
+        const px = cx + g.pixels[i], py = y + g.pixels[i + 1];
+        const x0 = Math.round(px * s), y0 = Math.round(py * s);
+        ctx.fillRect(x0, y0, Math.round((px + 1) * s) - x0, Math.round((py + 1) * s) - y0);
+      }
+      cx += g.w + 1;
+    }
+  }
+  texture(img, x, y, w, h, alpha) {
+    const s = this.s, ctx = this.ctx;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, Math.round(x * s), Math.round(y * s), Math.round((x + w) * s) - Math.round(x * s), Math.round((y + h) * s) - Math.round(y * s));
+    ctx.restore();
+  }
+}
+
+// ---- Port of hud/WidgetRenderer --------------------------------------------------------------
+const PADDING = 5, COVER = 32, GAP = 7, LINE = 11, CORNER = 8, MAX_TEXT_WIDTH = 140, HOTBAR_DROP = 8;
+const BAR_COUNT = 5, BAR_WIDTH = 2, BAR_GAP = 2, BARS_WIDTH = BAR_COUNT * BAR_WIDTH + (BAR_COUNT - 1) * BAR_GAP;
+const COLOR_PANEL = 0x14141A, COLOR_EDGE = 0x33343A, COLOR_TITLE = 0xFFFFFF, COLOR_ARTIST = 0xB3B3B3,
+  COLOR_TIME = 0x8C8C8C, COLOR_BARS = 0xDCDCDC, COLOR_TRACK = 0x3A3A44, COLOR_PROGRESS = 0x1DB954;
+const VANILLA_BACKGROUND = 0xF0100010, VANILLA_BORDER_TOP = 0x505000FF, VANILLA_BORDER_BOTTOM = 0x5028007F,
+  VANILLA_WHITE = 0xFFFFFF, VANILLA_GRAY = 0xAAAAAA, VANILLA_DARK_GRAY = 0x555555, VANILLA_LINE = 10;
+const idiv = (a, b) => Math.trunc(a / b);
+const jround = v => Math.floor(v + 0.5);
+
+function formatTime(ms) {
+  const total = Math.floor(Math.max(0, ms) / 1000);
+  return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+}
+const timeLabel = t => formatTime(t.progressMs) + " / " + formatTime(t.durationMs);
+const remainingMs = t => Math.max(0, t.durationMs - t.progressMs);
+
+function draw(cv, cfg, t, alpha, now) {
+  switch (cfg.layout) {
+    case "BAR": return drawBar(cv, cfg, t, alpha, now);
+    case "COMPACT": return drawCompact(cv, cfg, t, alpha);
+    case "HOTBAR": return drawHotbarLine(cv, cfg, t, alpha, now);
+    case "VANILLA": return drawVanilla(cv, cfg, t, alpha, now);
+    default: return drawClassic(cv, cfg, t, alpha, now);
+  }
+}
+
+function drawClassic(cv, cfg, t, alpha, now) {
+  const title = cv.trim(t.title, MAX_TEXT_WIDTH), artist = cv.trim(t.artist, MAX_TEXT_WIDTH), time = timeLabel(t);
+  let textWidth = Math.max(cv.textWidth(title), cv.textWidth(artist));
+  if (cfg.showTimestamps) textWidth = Math.max(textWidth, cv.textWidth(time));
+  textWidth = Math.min(textWidth, MAX_TEXT_WIDTH);
+  let width = PADDING * 2 + textWidth;
+  if (cfg.showAlbumArt) width += COVER + GAP;
+  if (cfg.showWaveform) width += BARS_WIDTH + GAP;
+  const height = PADDING * 2 + COVER;
+  const [x, y] = begin(cv, cfg, width, height, alpha);
+  panel(cv, cfg, x, y, width, height, alpha);
+  let contentX = x + PADDING;
+  if (cfg.showAlbumArt) contentX = cover(cv, t, contentX, y + PADDING, COVER, alpha);
+  const ta = Math.round(255 * alpha), textY = y + PADDING + 1;
+  cv.text(title, contentX, textY, argb(COLOR_TITLE, ta), true);
+  cv.text(artist, contentX, textY + LINE, argb(COLOR_ARTIST, ta), true);
+  if (cfg.showTimestamps) cv.text(time, contentX, textY + LINE * 2, argb(COLOR_TIME, ta), true);
+  if (cfg.showWaveform) equaliser(cv, x + width - PADDING - BARS_WIDTH, y + idiv(height, 2), t, alpha, now);
+  cv.pop();
+}
+
+function drawBar(cv, cfg, t, alpha, now) {
+  const title = cv.trim(t.title, MAX_TEXT_WIDTH), time = timeLabel(t);
+  const timeWidth = cfg.showTimestamps ? cv.textWidth(time) + GAP : 0;
+  const artist = cv.trim(t.artist, Math.max(40, MAX_TEXT_WIDTH - timeWidth));
+  const secondLine = cv.textWidth(artist) + timeWidth;
+  const textWidth = Math.min(MAX_TEXT_WIDTH, Math.max(cv.textWidth(title), Math.max(secondLine, 80)));
+  let width = PADDING * 2 + textWidth;
+  if (cfg.showAlbumArt) width += COVER + GAP;
+  if (cfg.showWaveform) width += BARS_WIDTH + GAP;
+  const height = PADDING * 2 + COVER;
+  const [x, y] = begin(cv, cfg, width, height, alpha);
+  panel(cv, cfg, x, y, width, height, alpha);
+  let contentX = x + PADDING;
+  if (cfg.showAlbumArt) contentX = cover(cv, t, contentX, y + PADDING, COVER, alpha);
+  const ta = Math.round(255 * alpha);
+  cv.text(title, contentX, y + PADDING + 2, argb(COLOR_TITLE, ta), true);
+  cv.text(artist, contentX, y + PADDING + 2 + LINE, argb(COLOR_ARTIST, ta), true);
+  if (cfg.showTimestamps) {
+    let timeX = x + width - PADDING - cv.textWidth(time);
+    if (cfg.showWaveform) timeX -= BARS_WIDTH + GAP;
+    cv.text(time, timeX, y + PADDING + 2 + LINE, argb(COLOR_TIME, ta), true);
+  }
+  if (cfg.showWaveform) equaliser(cv, x + width - PADDING - BARS_WIDTH, y + PADDING + 8, t, alpha, now);
+  progress(cv, contentX, y + height - PADDING - 4, x + width - PADDING - contentX, 4, t, alpha);
+  cv.pop();
+}
+
+function drawCompact(cv, cfg, t, alpha) {
+  const art = 16, pad = 3, height = 22, dot = "·";
+  const title = cv.trim(t.title, 120), artist = cv.trim(t.artist, 90);
+  const remaining = "-" + formatTime(remainingMs(t));
+  let textWidth = cv.textWidth(title);
+  if (artist !== "") textWidth += 5 + cv.textWidth(dot) + 5 + cv.textWidth(artist);
+  const timeWidth = cfg.showTimestamps ? 8 + cv.textWidth(remaining) : 0;
+  let width = pad * 2 + textWidth + timeWidth;
+  if (cfg.showAlbumArt) width += art + 5;
+  const [x, y] = begin(cv, cfg, width, height, alpha);
+  panel(cv, cfg, x, y, width, height, alpha);
+  let contentX = x + pad;
+  if (cfg.showAlbumArt) { artwork(cv, t, contentX, y + pad, art, alpha); contentX += art + 5; }
+  const ta = Math.round(255 * alpha), textY = y + 7;
+  const titleColor = t.playing ? COLOR_TITLE : 0xC6C6CC;
+  cv.text(title, contentX, textY, argb(titleColor, ta), true);
+  const after = contentX + cv.textWidth(title);
+  if (artist !== "") {
+    cv.text(dot, after + 5, textY, argb(0x63636F, ta), true);
+    cv.text(artist, after + 5 + cv.textWidth(dot) + 5, textY, argb(COLOR_ARTIST, ta), true);
+  }
+  if (cfg.showTimestamps) cv.text(remaining, x + width - pad - cv.textWidth(remaining), textY, argb(COLOR_TIME, ta), true);
+  progress(cv, x + pad, y + height - pad - 1, width - pad * 2, 2, t, alpha);
+  cv.pop();
+}
+
+function drawHotbarLine(cv, cfg, t, alpha, now) {
+  const dot = "·";
+  const title = cv.trim(t.title, 200), artist = cv.trim(t.artist, 160), time = timeLabel(t);
+  const titleWidth = cv.textWidth(title), dotWidth = cv.textWidth(dot);
+  const artistWidth = artist === "" ? 0 : 5 + dotWidth + 5 + cv.textWidth(artist);
+  const timeWidth = cfg.showTimestamps ? 8 + cv.textWidth(time) : 0;
+  const width = titleWidth + artistWidth + timeWidth;
+  const barsWidth = cfg.showWaveform ? BARS_WIDTH + 6 : 0;
+  const scale = Math.max(0.5, Math.min(2, cfg.scale));
+  cv.push(scale);
+  const sw = Math.round(cv.screenWidth() / scale), sh = Math.round(cv.screenHeight() / scale);
+  let x = idiv(sw - (width + barsWidth), 2);
+  const base = (cv.statusBars ? 69 : 55) - HOTBAR_DROP;
+  const y = sh - base - cfg.offsetY + Math.round((1 - alpha) * 4);
+  const ta = Math.round(255 * alpha);
+  if (cfg.showWaveform) { equaliser(cv, x, y + 4, t, alpha, now); x += barsWidth; }
+  const titleColor = t.playing ? COLOR_TITLE : 0xC6C6CC;
+  cv.text(title, x, y, argb(titleColor, ta), true);
+  const after = x + titleWidth;
+  if (artist !== "") {
+    cv.text(dot, after + 5, y, argb(0x8A8A96, ta), true);
+    cv.text(artist, after + 5 + dotWidth + 5, y, argb(COLOR_ARTIST, ta), true);
+  }
+  if (cfg.showTimestamps) cv.text(time, x + width - cv.textWidth(time), y, argb(COLOR_TIME, ta), true);
+  cv.pop();
+}
+
+function drawVanilla(cv, cfg, t, alpha, now) {
+  const icon = 16;
+  const title = cv.trim(t.title, MAX_TEXT_WIDTH), artist = cv.trim(t.artist, MAX_TEXT_WIDTH), time = timeLabel(t);
+  const lines = 2 + (cfg.showTimestamps ? 1 : 0);
+  let textWidth = Math.max(cv.textWidth(title), cv.textWidth(artist));
+  if (cfg.showTimestamps) textWidth = Math.max(textWidth, cv.textWidth(time));
+  let contentWidth = textWidth;
+  if (cfg.showAlbumArt) contentWidth += icon + 4;
+  if (cfg.showWaveform) contentWidth += BARS_WIDTH + 6;
+  const contentHeight = Math.max(lines * VANILLA_LINE - 2, cfg.showAlbumArt ? icon : 0);
+  const width = contentWidth + 8, height = contentHeight + 8;
+  const origin = begin(cv, cfg, width, height, alpha);
+  const contentX = origin[0] + 4, contentY = origin[1] + 4;
+  tooltipFrame(cv, contentX, contentY, contentWidth, contentHeight, alpha);
+  let textX = contentX;
+  if (cfg.showAlbumArt) { artwork(cv, t, contentX, contentY, icon, alpha); textX += icon + 4; }
+  const ta = Math.round(255 * alpha);
+  cv.text(title, textX, contentY, argb(VANILLA_WHITE, ta), true);
+  cv.text(artist, textX, contentY + VANILLA_LINE, argb(VANILLA_GRAY, ta), true);
+  if (cfg.showTimestamps) cv.text(time, textX, contentY + VANILLA_LINE * 2, argb(VANILLA_DARK_GRAY, ta), true);
+  if (cfg.showWaveform) equaliser(cv, contentX + contentWidth - BARS_WIDTH, contentY + idiv(contentHeight, 2), t, alpha, now);
+  cv.pop();
+}
+
+function tooltipFrame(cv, x, y, width, height, alpha) {
+  const background = scaleAlpha(VANILLA_BACKGROUND, alpha);
+  cv.rect(x - 3, y - 4, width + 6, 1, background);
+  cv.rect(x - 3, y + height + 3, width + 6, 1, background);
+  cv.rect(x - 3, y - 3, width + 6, height + 6, background);
+  cv.rect(x - 4, y - 3, 1, height + 6, background);
+  cv.rect(x + width + 3, y - 3, 1, height + 6, background);
+  const top = scaleAlpha(VANILLA_BORDER_TOP, alpha), bottom = scaleAlpha(VANILLA_BORDER_BOTTOM, alpha);
+  const borderHeight = height + 4;
+  for (let row = 0; row < borderHeight; row++) {
+    const color = lerpColor(top, bottom, borderHeight <= 1 ? 0 : row / (borderHeight - 1));
+    cv.rect(x - 3, y - 2 + row, 1, 1, color);
+    cv.rect(x + width + 2, y - 2 + row, 1, 1, color);
+  }
+  cv.rect(x - 3, y - 3, width + 6, 1, top);
+  cv.rect(x - 3, y + height + 2, width + 6, 1, bottom);
+}
+
+function scaleAlpha(c, alpha) {
+  const a = Math.round(((c >>> 24) & 0xFF) * Math.max(0, Math.min(1, alpha)));
+  return ((a << 24) | (c & 0xFFFFFF)) >>> 0;
+}
+function lerpColor(from, to, t) {
+  let color = 0;
+  for (let shift = 0; shift < 32; shift += 8) {
+    const a = (from >>> shift) & 0xFF, b = (to >>> shift) & 0xFF;
+    color |= (Math.round(a + (b - a) * t) & 0xFF) << shift;
+  }
+  return color >>> 0;
+}
+
+function begin(cv, cfg, width, height, alpha) {
+  const scale = Math.max(0.5, Math.min(2, cfg.scale));
+  const left = cfg.corner.endsWith("LEFT"), top = cfg.corner.startsWith("TOP");
+  const sw = Math.round(cv.screenWidth() / scale), sh = Math.round(cv.screenHeight() / scale);
+  let x = left ? cfg.offsetX : sw - width - cfg.offsetX;
+  const y = top ? cfg.offsetY : sh - height - cfg.offsetY;
+  const slide = Math.round((1 - alpha) * 8);
+  x += left ? -slide : slide;
+  cv.push(scale);
+  return [x, y];
+}
+
+function panel(cv, cfg, x, y, width, height, alpha) {
+  const panelAlpha = Math.round(255 * (cfg.backgroundOpacity / 100) * alpha);
+  const radius = Math.min(CORNER, idiv(height, 3));
+  roundedRect(cv, x, y, width, height, radius, argb(COLOR_PANEL, panelAlpha));
+  roundedOutline(cv, x, y, width, height, radius, argb(COLOR_EDGE, Math.round(panelAlpha * 0.8)));
+}
+
+function cover(cv, t, x, y, size, alpha) { artwork(cv, t, x, y, size, alpha); return x + size + GAP; }
+
+function artwork(cv, t, x, y, size, alpha) {
+  if (t.art === "record") record(cv, x, y, size, hashCode(t.id), alpha);
+  else if (t.art === "loading" || !t.image) roundedRect(cv, x, y, size, size, Math.max(3, idiv(size, 8)), argb(0x2A2A30, Math.round(255 * alpha)));
+  else cv.texture(t.image, x, y, size, size, alpha);
+}
+
+function record(cv, x, y, size, seed, alpha) {
+  const fullAlpha = Math.round(255 * alpha), radius = idiv(size, 2);
+  const palette = [0xD34F4F, 0x4F8FD3, 0x63C74D, 0xD3B24F, 0xA05FD3, 0x4FD3C0, 0xD37A4F];
+  const label = palette[((seed % palette.length) + palette.length) % palette.length];
+  for (let row = 0; row < size; row++) {
+    const dy = row + 0.5 - radius;
+    const half = Math.sqrt(Math.max(0, radius * radius - dy * dy));
+    const span = jround(half * 2);
+    if (span <= 0) continue;
+    cv.rect(x + radius - idiv(span, 2), y + row, span, 1, argb(0x121216, fullAlpha));
+    const labelRadius = radius * 0.42;
+    if (Math.abs(dy) < labelRadius) {
+      const labelSpan = jround(Math.sqrt(labelRadius * labelRadius - dy * dy) * 2);
+      if (labelSpan > 0) cv.rect(x + radius - idiv(labelSpan, 2), y + row, labelSpan, 1, argb(label, fullAlpha));
+    }
+    if (Math.abs(dy) < 1.2) cv.rect(x + radius - 1, y + row, 2, 1, argb(0x101014, fullAlpha));
+  }
+}
+
+function progress(cv, x, y, width, height, t, alpha) {
+  if (width <= 2) return;
+  const fraction = t.durationMs <= 0 ? 0 : Math.max(0, Math.min(1, t.progressMs / t.durationMs));
+  const filled = Math.round(width * fraction);
+  const backing = argb(COLOR_TRACK, Math.round(200 * alpha)), fill = argb(COLOR_PROGRESS, Math.round(255 * alpha));
+  if (height >= 3) {
+    roundedRect(cv, x, y, width, height, idiv(height, 2), backing);
+    if (filled > 1) roundedRect(cv, x, y, filled, height, idiv(height, 2), fill);
+  } else {
+    cv.rect(x, y, width, height, backing);
+    if (filled > 0) cv.rect(x, y, filled, height, fill);
+  }
+}
+
+function equaliser(cv, x, centerY, t, alpha, seconds) {
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const phase = seconds * 6.0 + i * 1.3;
+    const wave = t.playing ? (Math.sin(phase) * 0.5 + Math.sin(phase * 0.6 + 1.1) * 0.5) : 0;
+    const barHeight = t.playing ? jround(5 + Math.abs(wave) * 11) : 4 + (i % 2) * 2;
+    cv.rect(x + i * (BAR_WIDTH + BAR_GAP), centerY - idiv(barHeight, 2), BAR_WIDTH, barHeight, argb(COLOR_BARS, Math.round(230 * alpha)));
+  }
+}
+
+function roundedRect(cv, x, y, width, height, radius, color) {
+  for (let row = 0; row < height; row++) {
+    const ins = inset(row, height, radius);
+    cv.rect(x + ins, y + row, width - ins * 2, 1, color);
+  }
+}
+function roundedOutline(cv, x, y, width, height, radius, color) {
+  let previous = -1;
+  for (let row = 0; row < height; row++) {
+    const ins = inset(row, height, radius);
+    if (row === 0 || row === height - 1) {
+      cv.rect(x + ins, y + row, width - ins * 2, 1, color);
+    } else {
+      cv.rect(x + ins, y + row, 1, 1, color);
+      cv.rect(x + width - ins - 1, y + row, 1, 1, color);
+      if (previous >= 0 && previous !== ins) {
+        cv.rect(x + ins, y + row, previous - ins, 1, color);
+        cv.rect(x + width - previous, y + row, previous - ins, 1, color);
+      }
+    }
+    previous = ins;
+  }
+}
+function inset(row, height, radius) {
+  if (radius <= 0) return 0;
+  let distance = 0;
+  if (row < radius) distance = (radius - 0.5) - row;
+  else if (row >= height - radius) distance = row - (height - radius - 0.5);
+  if (distance <= 0) return 0;
+  const inner = radius * radius - distance * distance;
+  if (inner <= 0) return radius;
+  return jround(radius - Math.sqrt(inner));
+}
+function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0; return h; }
+
+// ---- Cover art, built like CoverArt: 64x64, corners feathered with an 8px radius -------------
+const TEXTURE_SIZE = 64, COVER_RADIUS = 8;
+function roundCorners(source) {
+  const c = document.createElement("canvas");
+  c.width = c.height = TEXTURE_SIZE;
+  const g = c.getContext("2d");
+  g.imageSmoothingQuality = "high";
+  g.drawImage(source, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+  const img = g.getImageData(0, 0, TEXTURE_SIZE, TEXTURE_SIZE);
+  for (let py = 0; py < TEXTURE_SIZE; py++) for (let px = 0; px < TEXTURE_SIZE; px++) {
+    const cx = px + 0.5, cy = py + 0.5;
+    let dx = 0, dy = 0;
+    if (cx < COVER_RADIUS) dx = COVER_RADIUS - cx; else if (cx > TEXTURE_SIZE - COVER_RADIUS) dx = cx - (TEXTURE_SIZE - COVER_RADIUS);
+    if (cy < COVER_RADIUS) dy = COVER_RADIUS - cy; else if (cy > TEXTURE_SIZE - COVER_RADIUS) dy = cy - (TEXTURE_SIZE - COVER_RADIUS);
+    const coverage = Math.max(0, Math.min(1, COVER_RADIUS + 0.5 - Math.hypot(dx, dy)));
+    img.data[(py * TEXTURE_SIZE + px) * 4 + 3] *= coverage;
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+function paintCover(kind) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const g = c.getContext("2d");
+  const grad = (stops, x1 = 256, y1 = 256) => { const lg = g.createLinearGradient(0, 0, x1, y1); stops.forEach((s, i) => lg.addColorStop(i / (stops.length - 1), s)); return lg; };
+  if (kind === "sunset") {
+    g.fillStyle = grad(["#ff7a59", "#c4307a", "#3a1c71"], 0, 256); g.fillRect(0, 0, 256, 256);
+    g.fillStyle = "#ffd166"; g.beginPath(); g.arc(128, 150, 62, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#2a1450"; g.fillRect(0, 170, 256, 86);
+    for (let i = 0; i < 5; i++) { g.fillStyle = "rgba(255,209,102,0.5)"; g.fillRect(70 + i * 6, 182 + i * 14, 116 - i * 12, 4); }
+  } else if (kind === "ocean") {
+    g.fillStyle = grad(["#0b3d5c", "#1f8a9e", "#c7f0e8"], 0, 256); g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = "rgba(255,255,255,0.55)"; g.lineWidth = 8;
+    for (let i = 0; i < 6; i++) { g.beginPath(); for (let x = 0; x <= 256; x += 8) g.lineTo(x, 60 + i * 34 + Math.sin(x / 22 + i) * 9); g.stroke(); }
+  } else if (kind === "neon") {
+    g.fillStyle = "#0d0221"; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = "#ff2a6d"; g.lineWidth = 10; g.strokeRect(48, 48, 160, 160);
+    g.strokeStyle = "#05d9e8"; g.beginPath(); g.arc(128, 128, 56, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = "#d1f7ff"; g.font = "bold 44px sans-serif"; g.textAlign = "center"; g.fillText("NITE", 128, 144);
+  } else {
+    g.fillStyle = "#efe8da"; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = "#1d1d1d"; g.fillRect(36, 36, 72, 184);
+    g.fillStyle = "#c8372d"; g.beginPath(); g.arc(170, 96, 46, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#1d1d1d"; g.font = "600 26px serif"; g.fillText("vol. 2", 134, 214);
+  }
+  return roundCorners(c);
+}
+const COVERS = { sunset: paintCover("sunset"), ocean: paintCover("ocean"), neon: paintCover("neon"), paper: paintCover("paper"), upload: null };
+
+// ---- Scene + vanilla HUD ---------------------------------------------------------------------
+function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const SCENES = {
+  plains: { sky: ["#6b9bf2", "#a8c8ff"], top: [0x5fa13a, 0x67ad3f, 0x538f32], fill: [0x866043, 0x79563c, 0x93694a], horizon: 0.64 },
+  night: { sky: ["#05081c", "#18204a"], top: [0x2c4a22, 0x335528, 0x26401d], fill: [0x3e2d22, 0x36271d, 0x45322a], horizon: 0.64, stars: true },
+  snow: { sky: ["#b9cde4", "#e3ecf6"], top: [0xf4f8fb, 0xffffff, 0xe6edf3], fill: [0xdfe7ee, 0xeef3f7, 0xd3dde6], horizon: 0.6 },
+  desert: { sky: ["#8db6ea", "#d9e8f7"], top: [0xdbcf9f, 0xe3d7a8, 0xcfc392], fill: [0xd8cb98, 0xcdbf8a, 0xe0d3a3], horizon: 0.62 },
+  cave: { sky: null, top: [0x6f6f6f, 0x7a7a7a, 0x626262], fill: [0x6f6f6f, 0x7a7a7a, 0x5d5d5d], horizon: 0 , dark: true },
+  nether: { sky: ["#2a0606", "#5a1414"], top: [0x6e2b2b, 0x7a3030, 0x5e2323], fill: [0x6e2b2b, 0x612626, 0x7d3333], horizon: 0.58 },
+};
+function hex(c) { return "#" + (c & 0xFFFFFF).toString(16).padStart(6, "0"); }
+
+function drawScene(ctx, gw, gh, k, sceneId, survival, itemName) {
+  const sc = SCENES[sceneId], rand = rng(7);
+  const R = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(Math.round(x * k), Math.round(y * k), Math.round((x + w) * k) - Math.round(x * k), Math.round((y + h) * k) - Math.round(y * k)); };
+  const horizon = Math.round(gh * sc.horizon);
+  if (sc.sky) {
+    const g = ctx.createLinearGradient(0, 0, 0, horizon * k);
+    g.addColorStop(0, sc.sky[0]); g.addColorStop(1, sc.sky[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, gw * k, horizon * k);
+  }
+  if (sc.stars) for (let i = 0; i < 90; i++) R(Math.floor(rand() * gw), Math.floor(rand() * horizon * 0.9), 1, 1, "rgba(255,255,255," + (0.4 + rand() * 0.6) + ")");
+  const cell = 4;
+  for (let y = horizon; y < gh; y += cell) {
+    const isTop = y < horizon + 8;
+    for (let x = 0; x < gw; x += cell) {
+      const pal = isTop ? sc.top : sc.fill;
+      R(x, y, cell, cell, hex(pal[Math.floor(rand() * pal.length)]));
+    }
+  }
+  if (sc.dark) {
+    const v = ctx.createRadialGradient(gw * k / 2, gh * k / 2, gh * k * 0.1, gw * k / 2, gh * k / 2, gw * k * 0.7);
+    v.addColorStop(0, "rgba(0,0,0,0.1)"); v.addColorStop(1, "rgba(0,0,0,0.75)");
+    ctx.fillStyle = v; ctx.fillRect(0, 0, gw * k, gh * k);
+  }
+  // crosshair
+  const cx = Math.floor(gw / 2), cy = Math.floor(gh / 2);
+  R(cx - 4, cy, 9, 1, "rgba(255,255,255,0.85)"); R(cx, cy - 4, 1, 9, "rgba(255,255,255,0.85)");
+  // hotbar 182x22
+  const hx = Math.floor(gw / 2) - 91, hy = gh - 22;
+  R(hx, hy, 182, 22, "rgba(0,0,0,0.55)");
+  R(hx, hy, 182, 1, "#2b2b2b"); R(hx, hy + 21, 182, 1, "#2b2b2b");
+  for (let i = 0; i < 9; i++) { R(hx + 1 + i * 20, hy + 1, 20, 20, "#8b8b8b"); R(hx + 3 + i * 20, hy + 3, 16, 16, "#6f6f6f"); }
+  // sword in slot 1
+  const sx = hx + 3, sy = hy + 3;
+  for (let i = 0; i < 10; i++) R(sx + 4 + i, sy + 11 - i, 2, 2, "#6fe3e0");
+  R(sx + 3, sy + 10, 4, 1, "#5a3a1e"); R(sx + 5, sy + 8, 1, 5, "#5a3a1e"); R(sx + 2, sy + 12, 2, 2, "#5a3a1e");
+  R(hx - 1, hy - 1, 24, 1, "#ffffff"); R(hx - 1, hy + 22, 24, 1, "#ffffff"); R(hx - 1, hy - 1, 1, 24, "#ffffff"); R(hx + 22, hy - 1, 1, 24, "#ffffff");
+  if (survival) {
+    R(hx, gh - 29, 182, 5, "#1b1b1b"); R(hx + 1, gh - 28, 120, 3, "#80ff20");
+    for (let i = 0; i < 10; i++) {
+      const x = hx + i * 8, y = gh - 39;
+      R(x, y + 1, 9, 6, "#1b0000"); R(x + 1, y, 3, 1, "#1b0000"); R(x + 5, y, 3, 1, "#1b0000"); R(x + 2, y + 7, 5, 1, "#1b0000"); R(x + 3, y + 8, 3, 1, "#1b0000");
+      R(x + 1, y + 1, 3, 5, "#e3202b"); R(x + 5, y + 1, 3, 5, "#e3202b"); R(x + 2, y + 6, 5, 1, "#e3202b"); R(x + 3, y + 7, 3, 1, "#e3202b"); R(x + 4, y + 2, 1, 4, "#e3202b");
+      R(x + 2, y + 2, 1, 1, "#ffb3b3");
+      const fx = hx + 182 - 9 - i * 8;
+      R(fx + 1, y + 1, 6, 5, "#3a1e0a"); R(fx + 2, y + 2, 4, 3, "#c27a3a"); R(fx + 6, y + 6, 2, 2, "#e8e0d0");
+    }
+  }
+  if (itemName) {
+    const cv = new Canvas(ctx, gw, gh, k, survival);
+    const label = "Diamond Sword";
+    const base = (survival ? 59 : 45) - HOTBAR_DROP;
+    cv.text(label, Math.floor((gw - cv.textWidth(label)) / 2), gh - base, 0xFFFFFFFF, true);
+  }
+}
+
+// ---- State ------------------------------------------------------------------------------------
+const LAYOUTS = [["CLASSIC", "Classic"], ["BAR", "Progress bar"], ["COMPACT", "Compact"], ["HOTBAR", "Above hotbar"], ["VANILLA", "Vanilla tooltip"]];
+const PRESETS = {
+  normal: { label: "Typical song", title: "Midnight Drive", artist: "Neon Harbor", duration: 214000, cover: "sunset", playing: true },
+  long: { label: "Very long title", title: "Concerto for Strings and Orchestra in D Minor, II. Adagio (Live at the Royal Hall)", artist: "Philharmonic Ensemble of Northern Europe", duration: 512000, cover: "paper", playing: true },
+  short: { label: "Short names", title: "Fog", artist: "Ilo", duration: 96000, cover: "ocean", playing: true },
+  paused: { label: "Paused", title: "Glass Rooftops", artist: "Lumen Park", duration: 187000, cover: "neon", playing: false },
+  loading: { label: "Cover still loading", title: "Paper Planes Over Town", artist: "Kite Season", duration: 201000, cover: "loading", playing: true },
+  jukebox: { label: "Jukebox record", title: "C418 - cat", artist: "Jukebox", duration: 185000, cover: "record", playing: true },
+};
+const state = {
+  layout: "CLASSIC", corner: "TOP_LEFT", scale: 1, offsetX: 6, offsetY: 6, backgroundOpacity: 88,
+  showAlbumArt: true, showTimestamps: true, showWaveform: true,
+  preset: "normal", title: PRESETS.normal.title, artist: PRESETS.normal.artist, playing: true,
+  durationMs: PRESETS.normal.duration, progressMs: 84000, cover: "sunset",
+  scene: "plains", res: "1920x1080", gui: 0, survival: true, itemName: true,
+  notes: {},
+};
+try { Object.assign(state, JSON.parse(localStorage.getItem("spotyPreview") || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem("spotyPreview", JSON.stringify(state)); } catch (e) {} };
+
+const $ = id => document.getElementById(id);
+function track() {
+  return {
+    id: state.title + state.artist, title: state.title, artist: state.artist, playing: state.playing,
+    durationMs: state.durationMs, progressMs: state.progressMs,
+    art: state.cover === "record" ? "record" : state.cover === "loading" ? "loading" : "cover",
+    image: COVERS[state.cover] || null,
+  };
+}
+
+// ---- Controls ---------------------------------------------------------------------------------
+const seg = $("layoutSeg"), closeups = $("closeups"), notes = $("notes");
+const closeupCanvases = {};
+LAYOUTS.forEach(([id, name]) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = name; b.dataset.layout = id;
+  b.addEventListener("click", () => { state.layout = id; sync(); });
+  seg.appendChild(b);
+
+  const card = document.createElement("button");
+  card.type = "button"; card.className = "closeup"; card.dataset.layout = id;
+  card.innerHTML = `<span class="name"><span>${name}</span><span>${id.toLowerCase()}</span></span>`;
+  const c = document.createElement("canvas");
+  card.prepend(c);
+  card.addEventListener("click", () => { state.layout = id; sync(); });
+  closeups.appendChild(card);
+  closeupCanvases[id] = c;
+
+  const wrap = document.createElement("label");
+  wrap.className = "stack";
+  wrap.innerHTML = `<span>${name}</span>`;
+  const ta = document.createElement("textarea");
+  ta.id = "note-" + id; ta.placeholder = "What would you change?";
+  ta.value = state.notes[id] || "";
+  ta.addEventListener("input", () => { state.notes[id] = ta.value; save(); });
+  wrap.appendChild(ta);
+  notes.appendChild(wrap);
+});
+{
+  const wrap = document.createElement("label");
+  wrap.className = "stack";
+  wrap.innerHTML = "<span>General</span>";
+  const ta = document.createElement("textarea");
+  ta.id = "note-GENERAL"; ta.placeholder = "Anything that applies to all designs";
+  ta.value = state.notes.GENERAL || "";
+  ta.addEventListener("input", () => { state.notes.GENERAL = ta.value; save(); });
+  wrap.appendChild(ta);
+  notes.appendChild(wrap);
+}
+for (const [id, p] of Object.entries(PRESETS)) $("preset").add(new Option(p.label, id));
+
+function applyPreset(id) {
+  const p = PRESETS[id];
+  Object.assign(state, { preset: id, title: p.title, artist: p.artist, durationMs: p.duration, cover: p.cover, playing: p.playing, progressMs: Math.round(p.duration * 0.4) });
+}
+
+const bind = (id, key, parse, event = "input") => $(id).addEventListener(event, e => { state[key] = parse(e.target); sync(); });
+bind("corner", "corner", el => el.value, "change");
+bind("scale", "scale", el => parseFloat(el.value), "change");
+bind("offsetX", "offsetX", el => +el.value);
+bind("offsetY", "offsetY", el => +el.value);
+bind("opacity", "backgroundOpacity", el => +el.value);
+bind("showArt", "showAlbumArt", el => el.checked, "change");
+bind("showTime", "showTimestamps", el => el.checked, "change");
+bind("showBars", "showWaveform", el => el.checked, "change");
+bind("title", "title", el => el.value);
+bind("artist", "artist", el => el.value);
+bind("playing", "playing", el => el.checked, "change");
+bind("cover", "cover", el => el.value, "change");
+bind("scene", "scene", el => el.value, "change");
+bind("res", "res", el => el.value, "change");
+bind("gui", "gui", el => +el.value, "change");
+bind("survival", "survival", el => el.checked, "change");
+bind("itemName", "itemName", el => el.checked, "change");
+$("pos").addEventListener("input", e => { state.progressMs = Math.round(state.durationMs * (+e.target.value / 1000)); sync(); });
+$("preset").addEventListener("change", e => { applyPreset(e.target.value); sync(); });
+$("upload").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => { COVERS.upload = roundCorners(img); state.cover = "upload"; sync(); URL.revokeObjectURL(img.src); };
+  img.src = URL.createObjectURL(file);
+});
+let alpha = 1, alphaTarget = 1;
+$("replay").addEventListener("click", () => { alpha = 0; alphaTarget = 1; });
+
+function sync() {
+  if (state.cover === "upload" && !COVERS.upload) state.cover = "sunset";
+  $("corner").value = state.corner; $("scale").value = String(state.scale);
+  $("offsetX").value = state.offsetX; $("offsetY").value = state.offsetY; $("opacity").value = state.backgroundOpacity;
+  $("offsetXVal").textContent = state.offsetX; $("offsetYVal").textContent = state.offsetY; $("opacityVal").textContent = state.backgroundOpacity + "%";
+  $("showArt").checked = state.showAlbumArt; $("showTime").checked = state.showTimestamps; $("showBars").checked = state.showWaveform;
+  $("preset").value = state.preset;
+  if (document.activeElement !== $("title")) $("title").value = state.title;
+  if (document.activeElement !== $("artist")) $("artist").value = state.artist;
+  $("playing").checked = state.playing; $("cover").value = state.cover;
+  $("scene").value = state.scene; $("res").value = state.res; $("gui").value = String(state.gui);
+  $("survival").checked = state.survival; $("itemName").checked = state.itemName;
+  document.querySelectorAll("[data-layout]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.layout === state.layout)));
+  sceneKey = null;
+  save();
+}
+
+// ---- Render loop ------------------------------------------------------------------------------
+const stage = $("stage"), sctx = stage.getContext("2d");
+const sceneCache = document.createElement("canvas");
+let sceneKey = null, guiInfo = null;
+
+function guiFor(w, h) {
+  if (state.gui > 0) return state.gui;
+  let s = 1;
+  while (s < 4 && w / (s + 1) >= 320 && h / (s + 1) >= 240) s++;
+  return s;
+}
+
+function renderStage(now) {
+  const [w, h] = state.res.split("x").map(Number);
+  const k = guiFor(w, h), gw = Math.ceil(w / k), gh = Math.ceil(h / k);
+  const key = [w, h, k, state.scene, state.survival, state.itemName].join("|");
+  if (key !== sceneKey) {
+    sceneCache.width = w; sceneCache.height = h;
+    const g = sceneCache.getContext("2d");
+    drawScene(g, gw, gh, k, state.scene, state.survival, state.itemName);
+    sceneKey = key;
+    if (stage.width !== w || stage.height !== h) { stage.width = w; stage.height = h; }
+    $("stageInfo").textContent = `${w}×${h} · GUI scale ${k} · ${gw}×${gh} GUI px`;
+  }
+  sctx.drawImage(sceneCache, 0, 0);
+  draw(new Canvas(sctx, gw, gh, k, state.survival), state, track(), alpha, now);
+}
+
+const CLOSE_ZOOM = 3, CLOSE_W = 240, CLOSE_H = 58;
+function renderCloseups(now) {
+  const t = track();
+  for (const [id] of LAYOUTS) {
+    const c = closeupCanvases[id], s = Math.max(0.5, Math.min(2, state.scale));
+    const w = Math.ceil(CLOSE_W * s * CLOSE_ZOOM), h = Math.ceil(CLOSE_H * s * CLOSE_ZOOM);
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    const g = c.getContext("2d");
+    g.fillStyle = state.scene === "snow" ? "#dfe7ee" : state.scene === "desert" ? "#d8cb98" : state.scene === "night" ? "#18204a" : state.scene === "cave" ? "#3d3d3d" : state.scene === "nether" ? "#4a1717" : "#7aa6e6";
+    g.fillRect(0, 0, w, h);
+    const cfg = Object.assign({}, state, { layout: id, corner: "TOP_LEFT", offsetX: 8, offsetY: id === "HOTBAR" ? -27 : 8 });
+    draw(new Canvas(g, CLOSE_W * s, CLOSE_H * s, CLOSE_ZOOM, true), cfg, t, 1, now);
+  }
+}
+
+let last = performance.now();
+function frame(ts) {
+  const delta = Math.min(0.1, (ts - last) / 1000);
+  last = ts;
+  if (state.playing) {
+    state.progressMs += delta * 1000;
+    if (state.progressMs > state.durationMs) state.progressMs = 0;
+    $("pos").value = Math.round(state.progressMs / state.durationMs * 1000);
+  }
+  $("posVal").textContent = formatTime(state.progressMs) + " / " + formatTime(state.durationMs);
+  alpha += (alphaTarget - alpha) * Math.min(1, delta * 4.5);
+  if (alpha > 0.995) alpha = 1;
+  const now = ts / 1000;
+  renderStage(now);
+  renderCloseups(now);
+  requestAnimationFrame(frame);
+}
+
+// ---- Feedback ---------------------------------------------------------------------------------
+const label = id => (LAYOUTS.find(l => l[0] === id) || [id, id])[1];
+function feedbackText() {
+  const cornerName = { TOP_LEFT: "Top left", TOP_RIGHT: "Top right", BOTTOM_LEFT: "Bottom left", BOTTOM_RIGHT: "Bottom right" }[state.corner];
+  const onOff = v => (v ? "on" : "off");
+  const lines = [
+    "## Spoty Widget design feedback",
+    "",
+    `- Viewing: ${label(state.layout)}`,
+    `- Settings: scale ${state.scale.toFixed(2)}x, corner ${cornerName}, offset ${state.offsetX}/${state.offsetY}, background ${state.backgroundOpacity}%, album art ${onOff(state.showAlbumArt)}, timestamps ${onOff(state.showTimestamps)}, equaliser ${onOff(state.showWaveform)}`,
+    `- Track: "${state.title}" by ${state.artist}, ${state.playing ? "playing" : "paused"}, ${formatTime(state.progressMs)} / ${formatTime(state.durationMs)}, cover ${state.cover}`,
+    `- World: ${$("scene").selectedOptions[0].text}, ${$("stageInfo").textContent}, ${state.survival ? "survival" : "creative"} HUD`,
+  ];
+  let any = false;
+  for (const id of [...LAYOUTS.map(l => l[0]), "GENERAL"]) {
+    const note = (state.notes[id] || "").trim();
+    if (!note) continue;
+    any = true;
+    lines.push("", `### ${id === "GENERAL" ? "General" : label(id)}`, note);
+  }
+  return any ? lines.join("\n") : null;
+}
+$("copy").addEventListener("click", () => {
+  const text = feedbackText();
+  const out = $("copyOut"), status = $("copyStatus");
+  if (!text) { status.textContent = "Write a note for at least one design first."; return; }
+  out.value = text;
+  const fallback = () => { out.hidden = false; out.focus(); out.select(); status.textContent = "Copy didn't work here. The text is selected below: press Ctrl+C."; };
+  try {
+    navigator.clipboard.writeText(text).then(() => { out.hidden = false; status.textContent = "Copied. Paste it into Claude Code."; }, fallback);
+  } catch (e) { fallback(); }
+});
+$("clearNotes").addEventListener("click", () => {
+  state.notes = {};
+  document.querySelectorAll("#notes textarea").forEach(t => { t.value = ""; });
+  $("copyOut").hidden = true; $("copyStatus").textContent = "Notes cleared.";
+  save();
+});
+
+sync();
+requestAnimationFrame(frame);
+})();
+</script>

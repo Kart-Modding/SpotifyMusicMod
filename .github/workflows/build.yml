@@ -1,14 +1,19 @@
 name: Build
 
-# Builds every Minecraft version for Fabric (also used on Quilt), NeoForge and Forge
+# Builds every Minecraft version for Fabric (also used on Quilt), NeoForge and Forge.
+# A push to main that changes mod.version also uploads the jars to Modrinth and CurseForge.
 on:
   push:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: build-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel main: a cancelled run could stop halfway through an upload
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -16,6 +21,9 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history, to compare mod.version with the previous push and build the changelog
+          fetch-depth: 0
 
       # 1.21.x builds target Java 21, 26.x targets Java 25. The runner's preinstalled
       # 64-bit JDK 8 (JAVA_HOME_8_X64) covers ForgeGradle's mapping step.
@@ -42,3 +50,35 @@ jobs:
           name: spotifywidget-${{ github.sha }}
           path: build/libs/*/*.jar
           if-no-files-found: error
+
+      - name: Check whether mod.version changed
+        id: version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          read_version() { sed -n 's/^mod\.version *= *"\(.*\)"/\1/p'; }
+          current=$(read_version < stonecutter.properties.toml)
+          previous=$(git show "$BEFORE:stonecutter.properties.toml" 2>/dev/null | read_version || true)
+          echo "Version: '$previous' -> '$current'"
+          if [ -n "$current" ] && [ "$current" != "$previous" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "PUBLISH_CHANGELOG<<CHANGELOG_EOF"
+              git log --no-merges --format='- %s' "$BEFORE..$GITHUB_SHA" 2>/dev/null || echo "- Version $current"
+              echo "CHANGELOG_EOF"
+            } >> "$GITHUB_ENV"
+          fi
+
+      # Tokens are repository secrets: GitHub masks them in logs and never hands them to pull requests from forks
+      - name: Publish to Modrinth and CurseForge
+        if: steps.version.outputs.changed == 'true'
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: ./gradlew publishMods --stacktrace
+
+      # Every other run checks the publishing setup without uploading anything (no token = dry run)
+      - name: Publish dry run
+        if: steps.version.outputs.changed != 'true'
+        run: ./gradlew publishMods --stacktrace

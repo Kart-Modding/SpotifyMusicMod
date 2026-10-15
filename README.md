@@ -61,7 +61,7 @@ That is all the setup.
 ### Which jar do I need?
 
 Each row ships as `-fabric`, `-neoforge` and `-forge` jars, named
-`spotifywidget-<loader>-1.0.0+<version>.jar`. Quilt uses the Fabric jar.
+`spotifywidget-<loader>-1.1.0+<version>.jar`. Quilt uses the Fabric jar.
 
 | Jar suffix | Minecraft versions |
 |---|---|
@@ -205,7 +205,7 @@ the jars for all versions and loaders as one artifact.
 ./gradlew buildAndCollect
 ```
 
-This builds every version for every loader. The jars go to `build/libs/1.0.0/`.
+This builds every version for every loader. The jars go to `build/libs/1.1.0/`.
 
 To build one node, run `./gradlew ":1.21.8-neoforge:build"`. Node names are `<version>-fabric|neoforge|forge`.
 To work on the code in an IDE, set the active node with the `stonecutter` Gradle tasks

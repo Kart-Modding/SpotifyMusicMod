@@ -1,6 +1,7 @@
 plugins {
     java
     id("net.minecraftforge.gradle")
+    id("me.modmuss50.mod-publish-plugin")
 }
 
 // Node "<group>-forge": pull the group's table and its forge sub-table out of stonecutter.properties.toml
@@ -93,5 +94,40 @@ tasks {
         inputs.property("version", project.property("mod.version"))
         from(jar.flatMap { it.archiveFile })
         into(rootProject.layout.buildDirectory.file("libs/${project.property("mod.version")}"))
+    }
+}
+
+// Uploads this node's jar to Modrinth and CurseForge.
+// CI runs it when mod.version changes on main. Without MODRINTH_TOKEN it is a dry run, so a local
+// `./gradlew publishMods` only logs what it would upload.
+publishMods {
+    // Arrays are flattened to "mod.mc_releases.0", ".1", ...
+    val releases = generateSequence(0) { it + 1 }
+        .map { project.findProperty("mod.mc_releases.$it")?.toString() }
+        .takeWhile { it != null }
+        .filterNotNull()
+        .toList()
+
+    file = tasks.jar.flatMap { it.archiveFile }
+    displayName = "${property("mod.name")} ${project.version} (Forge)"
+    version = project.version.toString()
+    changelog = providers.environmentVariable("PUBLISH_CHANGELOG").orElse("")
+    type = STABLE
+    modLoaders.addAll("forge")
+    dryRun = providers.environmentVariable("MODRINTH_TOKEN").orNull == null
+
+    modrinth {
+        projectId = "pjhN6TWN"
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        minecraftVersions.addAll(releases)
+    }
+
+    curseforge {
+        projectId = "1655041"
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        minecraftVersions.addAll(releases)
+        javaVersions.add(requiredJava)
+        clientRequired = true
+        serverRequired = false
     }
 }

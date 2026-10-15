@@ -12,6 +12,8 @@ pluginManagement {
         // Loader toolchains, picked per node by build.<loader>.gradle.kts
         id("net.neoforged.moddev") version "2.0.148"
         id("net.minecraftforge.gradle") version "7.0.40"
+        // Uploads jars to Modrinth and CurseForge (publishMods task)
+        id("me.modmuss50.mod-publish-plugin") version "2.2.1"
     }
 }
 

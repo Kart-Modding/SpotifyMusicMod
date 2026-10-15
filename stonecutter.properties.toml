@@ -1,7 +1,7 @@
 mod.id = "spotifywidget"
 mod.name = "Spoty Widget"
 mod.group = "dev.karton"
-mod.version = "1.0.0"
+mod.version = "1.1.0"
 mod.description = "Shows the Spotify track you are currently playing, with album art, in the corner of the screen."
 mod.author = "Kartonek"
 
