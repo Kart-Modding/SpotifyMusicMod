@@ -3,12 +3,22 @@ plugins {
     id("dev.kikugie.loom-back-compat")
 }
 
+// Node "<group>-fabric": pull the group's table and its fabric sub-table out of stonecutter.properties.toml
+val loader = "fabric"
+sc.properties.tags(sc.current.project.substringBeforeLast('-'), loader)
+
 version = "${property("mod.version")}+${sc.current.version}"
-base.archivesName = property("mod.id") as String
+base.archivesName = "${property("mod.id")}-$loader"
 
 val requiredJava: JavaVersion = when {
     sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
     else -> JavaVersion.VERSION_21
+}
+
+sourceSets.main {
+    // Entrypoints for the other loaders live next to this one
+    java.exclude("dev/karton/spotifywidget/loader/neoforge/**", "dev/karton/spotifywidget/loader/forge/**")
+    resources.exclude("META-INF/neoforge.mods.toml", "META-INF/mods.toml")
 }
 
 repositories {
@@ -21,7 +31,7 @@ repositories {
 
 dependencies {
     fun fapi(vararg modules: String) {
-        for (it in modules) modImplementation(fabricApi.module(it, sc.properties["deps.fabric_api"]))
+        for (it in modules) modImplementation(fabricApi.module(it, property("deps.fabric_api") as String))
     }
 
     minecraft("com.mojang:minecraft:${sc.current.version}")
@@ -66,22 +76,16 @@ java {
 
 tasks {
     processResources {
-        fun MutableMap<String, String>.register(key: String, property: String) {
-            val value: String = sc.properties[property]
-            inputs.property(key, value)
-            set(key, value)
-        }
-
-        val props = buildMap {
-            register("id", "mod.id")
-            register("name", "mod.name")
-            register("minecraft", "mod.mc_compat")
+        val props = mapOf(
+            "id" to project.property("mod.id") as String,
+            "name" to project.property("mod.name") as String,
+            "description" to project.property("mod.description") as String,
+            "author" to project.property("mod.author") as String,
+            "minecraft" to project.property("mod.mc_compat") as String,
             // "1.0.0+1.21.8" so every jar carries the game version it was built for
-            val fullVersion = project.version.toString()
-            inputs.property("version", fullVersion)
-            put("version", fullVersion)
-        }
-
+            "version" to project.version.toString(),
+        )
+        inputs.properties(props)
         filesMatching("fabric.mod.json") { expand(props) }
 
         val mixinJava = "JAVA_" + requiredJava.majorVersion

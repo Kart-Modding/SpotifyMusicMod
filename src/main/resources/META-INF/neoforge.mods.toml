@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mods]]
+modId = "${id}"
+version = "${version}"
+displayName = "${name}"
+authors = "${author}"
+description = '''${description}'''
+logoFile = "assets/spotifywidget/icon.png"
+
+[[mixins]]
+config = "spotifywidget.mixins.json"
+
+[[dependencies.${id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft}"
+ordering = "NONE"
+side = "CLIENT"

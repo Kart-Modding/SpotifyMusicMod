@@ -1,6 +1,8 @@
 # Spoty Widget
 
-Client-side Fabric mod by **Kartonek** that shows the song you are currently playing — album art,
+[![Build](https://github.com/Kart-Modding/SpotifyMusicMod/actions/workflows/build.yml/badge.svg)](https://github.com/Kart-Modding/SpotifyMusicMod/actions/workflows/build.yml)
+
+Client-side mod for **Fabric, Quilt, NeoForge and Forge** by **Kartonek** that shows the song you are currently playing — album art,
 title, artist, elapsed/total time and a small animated equaliser — in the corner of the screen
 (top left by default).
 
@@ -14,25 +16,32 @@ system already has from the Spotify desktop app:
 
 macOS is not supported.
 
-Built for **Minecraft 1.21.1 through 26.3** from one codebase using
+Built for **Minecraft 1.21.1 through 26.3** on every loader from one codebase using
 [Stonecutter](https://stonecutter.kikugie.dev/).
 
 ## Supported versions
 
+Each row ships as `-fabric`, `-neoforge` and `-forge` jars. Quilt uses the Fabric jar.
+
 | Jar | Covers |
 |---|---|
-| `spotifywidget-1.0.0+1.21.1.jar` | 1.21, 1.21.1 |
-| `spotifywidget-1.0.0+1.21.3.jar` | 1.21.2, 1.21.3 |
-| `spotifywidget-1.0.0+1.21.4.jar` | 1.21.4 |
-| `spotifywidget-1.0.0+1.21.5.jar` | 1.21.5 |
-| `spotifywidget-1.0.0+1.21.8.jar` | 1.21.6, 1.21.7, 1.21.8 |
-| `spotifywidget-1.0.0+1.21.10.jar` | 1.21.9, 1.21.10 |
-| `spotifywidget-1.0.0+1.21.11.jar` | 1.21.11 |
-| `spotifywidget-1.0.0+26.1.2.jar` | 26.1, 26.1.1, 26.1.2 |
-| `spotifywidget-1.0.0+26.2.jar` | 26.2 |
-| `spotifywidget-1.0.0+26.3.jar` | 26.3 |
+| `spotifywidget-<loader>-1.0.0+1.21.1.jar` | 1.21, 1.21.1 |
+| `spotifywidget-<loader>-1.0.0+1.21.3.jar` | 1.21.2, 1.21.3 |
+| `spotifywidget-<loader>-1.0.0+1.21.4.jar` | 1.21.4 |
+| `spotifywidget-<loader>-1.0.0+1.21.5.jar` | 1.21.5 |
+| `spotifywidget-<loader>-1.0.0+1.21.8.jar` | 1.21.6, 1.21.7, 1.21.8 |
+| `spotifywidget-<loader>-1.0.0+1.21.10.jar` | 1.21.9, 1.21.10 |
+| `spotifywidget-<loader>-1.0.0+1.21.11.jar` | 1.21.11 |
+| `spotifywidget-<loader>-1.0.0+26.1.2.jar` | 26.1, 26.1.1, 26.1.2 |
+| `spotifywidget-<loader>-1.0.0+26.2.jar` | 26.2 |
+| `spotifywidget-<loader>-1.0.0+26.3.jar` | 26.3 |
 
-Requires Fabric API. Mod Menu is optional but is where the settings screen lives.
+| Loader | Needs |
+|---|---|
+| Fabric | Fabric Loader 0.17+, Fabric API. Mod Menu optional (settings screen) |
+| Quilt | Quilt Loader with Fabric API (or QFAPI); use the `-fabric` jar |
+| NeoForge | NeoForge for that version. Settings under Mods → Spoty Widget → Config |
+| Forge | Forge for that version. Settings under Mods → Spoty Widget → Config |
 
 ## Install
 
@@ -47,7 +56,8 @@ Spotify publishes the real cover URL through MPRIS, and that is used directly.
 
 ## Settings
 
-Mod Menu → Spoty Widget, or edit `config/spotifywidget.json`.
+Mod Menu (Fabric/Quilt) or the Mods screen config button (NeoForge/Forge) → Spoty Widget, or edit
+`config/spotifywidget.json`.
 
 | Setting | Default | Notes |
 |---|---|---|
@@ -64,10 +74,13 @@ Mod Menu → Spoty Widget, or edit `config/spotifywidget.json`.
 | Timestamps | ON | `00:15 / 03:45` line |
 | Equaliser bars | ON | Animates while playing |
 | Hide while a menu is open | OFF | |
+| Hide when paused | OFF | Widget disappears while playback is paused |
 | Jukebox in widget | ON | Show a playing record instead of the desktop player |
 | Pause for jukebox | ON | Pause Spotify while a record plays, resume when it ends |
 | Player | Spotify only | Switch to "Any player" to also read browsers, VLC, etc. |
 | Refresh | 1000 ms | How often the player is polled |
+
+**Reset to defaults** (with confirmation) puts every option back.
 
 ### Designs
 
@@ -116,13 +129,25 @@ separately in the settings.
 
 ## Building
 
+Every push and pull request is built on GitHub Actions (`.github/workflows/build.yml`); the jars for
+all versions and loaders are attached to each run as one artifact.
+
 ```bash
 ./gradlew buildAndCollect
 ```
 
-Jars land in `build/libs/1.0.0/`. Single version: `./gradlew ":1.21.8:build"`.
-To work on the code in an IDE, pick the active version with the `stonecutter` Gradle tasks
+Builds every version for every loader; jars land in `build/libs/1.0.0/`. One node:
+`./gradlew ":1.21.8-neoforge:build"` (nodes are `<version>-fabric|neoforge|forge`).
+To work on the code in an IDE, pick the active node with the `stonecutter` Gradle tasks
 ("Set active version to ...").
+
+Toolchains: Fabric Loom (via loom-back-compat), NeoForge ModDevGradle, ForgeGradle 7, one buildscript
+each (`build.<loader>.gradle.kts`). Loader-specific code lives only in `loader/<loader>/` and in
+`//? if fabric`-style Stonecutter conditions; everything else is shared.
+
+ForgeGradle sets up every Forge node when Gradle configures, so the first build takes a while.
+Its mapping step needs a 64-bit Java 8; if an old 32-bit JDK 8 is installed it runs out of
+memory - point `JAVA_HOME_8_X64` at a 64-bit JDK 8 or remove the 32-bit one.
 
 ## How it works
 
@@ -135,5 +160,6 @@ To work on the code in an IDE, pick the active version with the `stonecutter` Gr
   only refreshes the timeline every few seconds.
 - Album art is downloaded, scaled and corner-rounded off-thread; the texture upload happens on the
   client tick, never inside HUD rendering.
-- Everything that Mojang renamed between 1.21.1 and 26.3 lives in `compat/`.
+- Everything that Mojang renamed between 1.21.1 and 26.3 lives in `compat/`; loader entrypoints
+  (HUD layer, key mappings, tick/shutdown events, config screen hook) live in `loader/`.
 - The mod is client only and never talks to the server you are playing on.

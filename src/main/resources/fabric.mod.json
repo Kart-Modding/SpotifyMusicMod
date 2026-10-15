@@ -3,19 +3,19 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "Shows the Spotify track you are currently playing, with album art, in the corner of the screen.",
+  "description": "${description}",
   "authors": [
-    "Kartonek"
+    "${author}"
   ],
   "license": "MIT",
   "icon": "assets/spotifywidget/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.karton.spotifywidget.SpotifyWidgetClient"
+      "dev.karton.spotifywidget.loader.fabric.FabricEntrypoint"
     ],
     "modmenu": [
-      "dev.karton.spotifywidget.config.ModMenuIntegration"
+      "dev.karton.spotifywidget.loader.fabric.ModMenuIntegration"
     ]
   },
   "mixins": [

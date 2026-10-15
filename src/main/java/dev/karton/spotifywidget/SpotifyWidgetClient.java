@@ -1,36 +1,49 @@
 package dev.karton.spotifywidget;
 
-import dev.karton.spotifywidget.compat.HudBridge;
+import dev.karton.spotifywidget.compat.Canvas;
 import dev.karton.spotifywidget.config.HudConfig;
 import dev.karton.spotifywidget.game.JukeboxWatcher;
 import dev.karton.spotifywidget.hud.CoverArt;
+import dev.karton.spotifywidget.hud.WidgetRenderer;
 import dev.karton.spotifywidget.input.MediaKeys;
 import dev.karton.spotifywidget.media.Media;
 import dev.karton.spotifywidget.media.MediaControl;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpotifyWidgetClient implements ClientModInitializer {
+/**
+ * Loader independent core. Each entrypoint under {@code loader/} calls {@link #init()} once, then
+ * wires {@link #tick()}, {@link #render(Canvas)} and {@link #shutdown()} into its own events.
+ */
+public final class SpotifyWidgetClient {
     public static final String MOD_ID = "spotifywidget";
     public static final Logger LOGGER = LoggerFactory.getLogger("Spotify Widget");
 
-    @Override
-    public void onInitializeClient() {
+    private SpotifyWidgetClient() {
+    }
+
+    /** Loads the config, creates the key mappings and starts reading the media session. */
+    public static void init() {
         HudConfig.get();
-        HudBridge.register();
         MediaKeys.register();
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            CoverArt.tick();
-            MediaKeys.tick();
-            JukeboxWatcher.tick();
-        });
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
-            MediaControl.shutdown();
-            Media.stop();
-        });
         Media.start();
+    }
+
+    /** End of every client tick. */
+    public static void tick() {
+        CoverArt.tick();
+        MediaKeys.tick();
+        JukeboxWatcher.tick();
+    }
+
+    /** Called from the loader's HUD layer. */
+    public static void render(Canvas canvas) {
+        WidgetRenderer.render(canvas);
+    }
+
+    /** Client is closing. */
+    public static void shutdown() {
+        MediaControl.shutdown();
+        Media.stop();
     }
 }

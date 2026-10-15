@@ -1,0 +1,44 @@
+name: Build
+
+# Builds every Minecraft version for Fabric (also used on Quilt), NeoForge and Forge
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      # 1.21.x builds target Java 21, 26.x targets Java 25. The runner's preinstalled
+      # 64-bit JDK 8 (JAVA_HOME_8_X64) covers ForgeGradle's mapping step.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            25
+            21
+
+      # Caches ~/.gradle, including the decompiled Minecraft for every Loom/MDG/ForgeGradle node
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Build all versions
+        run: |
+          chmod +x gradlew
+          ./gradlew buildAndCollect --stacktrace
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: spotifywidget-${{ github.sha }}
+          path: build/libs/*/*.jar
+          if-no-files-found: error

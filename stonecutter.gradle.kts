@@ -2,12 +2,14 @@ plugins {
     id("dev.kikugie.stonecutter")
 }
 
-stonecutter active "26.3.x"
+stonecutter active "26.3.x-fabric"
 
 stonecutter parameters {
     swaps["mod_version"] = "\"${property("mod.version")}\";"
     swaps["minecraft"] = "\"${node.metadata.version}\";"
-    dependencies["fapi"] = node.project.property("deps.fabric_api") as String
+
+    // Node names are "<group>-<loader>", so `//? if neoforge {` etc. work in sources
+    constants.match(node.metadata.project.substringAfterLast('-'), "fabric", "neoforge", "forge")
 
     replacements {
         // Minecraft 1.21.11 renamed ResourceLocation -> Identifier

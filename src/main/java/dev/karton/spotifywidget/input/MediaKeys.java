@@ -25,11 +25,11 @@ public final class MediaKeys {
     }
 
     public static void register() {
-        next = Keys.register("key.spotifywidget.next", InputConstants.KEY_RIGHT);
-        previous = Keys.register("key.spotifywidget.previous", InputConstants.KEY_LEFT);
-        volumeUp = Keys.register("key.spotifywidget.volume_up", InputConstants.KEY_UP);
-        volumeDown = Keys.register("key.spotifywidget.volume_down", InputConstants.KEY_DOWN);
-        playPause = Keys.register("key.spotifywidget.play_pause", Keys.UNBOUND);
+        next = Keys.create("key.spotifywidget.next", InputConstants.KEY_RIGHT);
+        previous = Keys.create("key.spotifywidget.previous", InputConstants.KEY_LEFT);
+        volumeUp = Keys.create("key.spotifywidget.volume_up", InputConstants.KEY_UP);
+        volumeDown = Keys.create("key.spotifywidget.volume_down", InputConstants.KEY_DOWN);
+        playPause = Keys.create("key.spotifywidget.play_pause", Keys.UNBOUND);
     }
 
     public static void tick() {

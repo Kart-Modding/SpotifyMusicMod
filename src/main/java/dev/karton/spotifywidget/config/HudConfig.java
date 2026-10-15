@@ -5,7 +5,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.karton.spotifywidget.SpotifyWidgetClient;
+//? if fabric {
 import net.fabricmc.loader.api.FabricLoader;
+//?} elif neoforge {
+/*import net.neoforged.fml.loading.FMLPaths;
+*///?} else {
+/*import net.minecraftforge.fml.loading.FMLPaths;
+*///?}
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +54,7 @@ public final class HudConfig {
     public boolean showWaveform = true;
     /** Keep the widget off screen while any GUI (inventory, chat, menus) is open. */
     public boolean hideWithGui = false;
-    /** Fade the widget out while the player is paused. */
+    /** Hide the widget while the player is paused. */
     public boolean hidePaused = false;
 
     public static HudConfig get() {
@@ -69,7 +75,10 @@ public final class HudConfig {
     }
 
     private static Path path() {
+        //? if fabric {
         return FabricLoader.getInstance().getConfigDir().resolve("spotifywidget.json");
+        //?} else
+        /*return FMLPaths.CONFIGDIR.get().resolve("spotifywidget.json");*/
     }
 
     public static HudConfig load() {
