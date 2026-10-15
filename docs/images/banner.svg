@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E0F14"/>
+      <stop offset="1" stop-color="#16241B"/>
+    </linearGradient>
+    <linearGradient id="art" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1DB954"/>
+      <stop offset="0.55" stop-color="#1E6F5C"/>
+      <stop offset="1" stop-color="#29294A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.78" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#1DB954" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#1DB954" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity="0.035"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="340" rx="24" fill="url(#bg)"/>
+  <rect width="1280" height="340" rx="24" fill="url(#grid)"/>
+  <rect width="1280" height="340" rx="24" fill="url(#glow)"/>
+
+  <image x="64" y="98" width="144" height="144" style="image-rendering:pixelated" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAB50lEQVR42u3dvW3CUBSGYS8ABRIVSpPaC6RlARo2YJlU7JN9skfYwFfRZ98f8xzprfE9firrSkxTYY7H05/GbUrHEgGwSAAEgAAQAAJAuwKQ/sA8f2nDLpfPxWIgAAAAAAAAAAAAAAAAAAAAAADQ0Qs+POahS19wGgAAAAAAAAAAAAAAAAAAAAAA1ASQLvD2+z106fkBAAAAAAAAAAAAAAAAAAAAAGBPAEoLHH3Oz+tiAAAAAAAAAAAAAAAAAAAAAAAwEoDSAdL5+LkPXTopEAAAAAAAAAAAAAAAAAAAAAAAqAmg9KFn9BectvWHIgAAAAAAAAAAAAAAAAAAAAAA2BOA1gMAAAAAAAAAAAAAAAAAAAAAAACsB6D3CyPp8wEAAAAAAAAAAAAAAAAAAAAAAAAuhAAAAAAAAAAAAAAAAAAAAAAAAAD1L4wAAAAAAAAAAAAAAAAAAAAAAAAA6/1hRGkBrS+M9H7hAwAAAAAAAAAAAAAAAAAAAAAAagIoPUDpgCmQ3kvPDwAAAAAAAAAAAAAAAAAAAAAANQGkD5CWLrB1rfcHAAAAAAAAAAAAAAAAAAAAAAD/AdA7kHcvfX8AAAAAAAAAAAAAAAAAAAAAvBeA0qQ/oLZN6VgiABYJgAAQAAJAAGhPAF675edgoq5yoQAAAABJRU5ErkJggg=="/>
+
+  <text x="240" y="150" fill="#FFFFFF" font-size="58" font-weight="700" letter-spacing="-1">Spoty Widget</text>
+  <text x="242" y="192" fill="#B3B3B3" font-size="22">Your Spotify “now playing” in the Minecraft HUD.</text>
+  <text x="242" y="222" fill="#8C8C8C" font-size="18">No account · No API key · No login · Client-side only</text>
+
+  <g font-size="14" font-weight="600">
+    <rect x="242" y="246" width="78" height="28" rx="14" fill="#1DB954" fill-opacity="0.16" stroke="#1DB954" stroke-opacity="0.5"/>
+    <text x="281" y="265" fill="#7BE3A0" text-anchor="middle">Fabric</text>
+    <rect x="328" y="246" width="70" height="28" rx="14" fill="#1DB954" fill-opacity="0.16" stroke="#1DB954" stroke-opacity="0.5"/>
+    <text x="363" y="265" fill="#7BE3A0" text-anchor="middle">Quilt</text>
+    <rect x="406" y="246" width="96" height="28" rx="14" fill="#1DB954" fill-opacity="0.16" stroke="#1DB954" stroke-opacity="0.5"/>
+    <text x="454" y="265" fill="#7BE3A0" text-anchor="middle">NeoForge</text>
+    <rect x="510" y="246" width="74" height="28" rx="14" fill="#1DB954" fill-opacity="0.16" stroke="#1DB954" stroke-opacity="0.5"/>
+    <text x="547" y="265" fill="#7BE3A0" text-anchor="middle">Forge</text>
+    <rect x="592" y="246" width="128" height="28" rx="14" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.2"/>
+    <text x="656" y="265" fill="#D0D0D6" text-anchor="middle">MC 1.21 – 26.3</text>
+  </g>
+
+  <!-- Classic widget mock, 3x scale -->
+  <g transform="translate(820 110)">
+    <rect x="0" y="0" width="396" height="120" rx="12" fill="#14141A" fill-opacity="0.92" stroke="#33343A" stroke-width="2"/>
+    <rect x="12" y="12" width="96" height="96" rx="10" fill="url(#art)"/>
+    <circle cx="60" cy="60" r="22" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="3"/>
+    <circle cx="60" cy="60" r="5" fill="#FFFFFF" fill-opacity="0.5"/>
+    <g font-family="Consolas, Menlo, monospace" font-size="22">
+      <text x="126" y="40" fill="#FFFFFF">Blinding Lights</text>
+      <text x="126" y="70" fill="#B3B3B3">The Weeknd</text>
+      <text x="126" y="100" fill="#8C8C8C">01:24 / 03:20</text>
+    </g>
+    <g fill="#DCDCDC">
+      <rect x="342" y="48" width="6" height="24" rx="1"/>
+      <rect x="352" y="38" width="6" height="44" rx="1"/>
+      <rect x="362" y="52" width="6" height="16" rx="1"/>
+      <rect x="372" y="42" width="6" height="36" rx="1"/>
+    </g>
+  </g>
+</svg>
