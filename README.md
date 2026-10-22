@@ -6,7 +6,7 @@
 [![Modrinth](https://img.shields.io/badge/Modrinth-Spoty%20Widget-1bd96a?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pjhN6TWN)
 [![CurseForge](https://img.shields.io/badge/CurseForge-Spoty%20Widget-f16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/spoty-widget)
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21%20→%2026.3-62b47a)
-![Platforms](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-3a3a44)
+![Platforms](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-3a3a44)
 [![License](https://img.shields.io/github/license/Kart-Modding/SpotifyMusicMod?color=3a3a44)](LICENSE)
 
 **[Features](#features) · [Install](#install) · [Designs](#designs) · [Settings](#settings) · [Controls](#playback-controls) · [How it works](#how-it-works) · [Building](#building)**
@@ -56,7 +56,7 @@ That is all the setup.
 |---|---|---|
 | **Windows** | ✅ Supported | Media session behind the volume flyout (SMTC), read by a bundled PowerShell helper |
 | **Linux** | ✅ Supported | MPRIS player on D-Bus (`org.mpris.MediaPlayer2.spotify`), read by `gdbus`, with `playerctl` as a fallback |
-| **macOS** | ❌ Not supported | |
+| **macOS** | ✅ Supported | Spotify (or Apple Music) asked through AppleScript via `osascript`. Allow Minecraft under System Settings → Privacy & Security → Automation the first time |
 
 ### Which jar do I need?
 
@@ -161,6 +161,8 @@ is playing. You do not need an account.
   Volume uses the media volume keys.
 - **Linux**: the mod uses `playerctl` if it is installed. If not, it uses MPRIS over `gdbus`, with
   `wpctl`/`pactl` for volume.
+- **macOS**: commands are sent to Spotify (or Apple Music) through AppleScript. Volume changes the
+  player's own volume.
 
 ## Jukebox
 
@@ -185,11 +187,13 @@ You can turn off the widget part and the pause part separately in the settings.
   the mod restarts it with backoff. The encoded script is not affected by the execution policy, and
   nothing is written to disk.
 - `media/LinuxMediaSource` calls `gdbus`/`playerctl` at the same interval.
+- `media/MacMediaSource` runs a short AppleScript through `/usr/bin/osascript` at the same interval.
+  It checks that the player is running first, so polling never launches Spotify.
 - The mod interpolates the playback position between reports. The timer stays smooth, although Windows
   only updates the timeline every few seconds.
 - **Album art**: Windows does not give usable cover art. The mod finds the cover by artist and title on
   Deezer, then on the iTunes search endpoint if Deezer has no match. Both are public and need no key.
-  On Linux, Spotify publishes the real cover URL through MPRIS, and the mod uses it directly.
+  On Linux and macOS, Spotify publishes the real cover URL, and the mod uses it directly.
 - The mod downloads, scales and rounds the album art on a background thread. It uploads the texture on the
   client tick, never during HUD rendering.
 - Everything that Mojang renamed between 1.21.1 and 26.3 is in `compat/`. Loader entrypoints (HUD layer,
@@ -233,7 +237,7 @@ src/main/java/dev/karton/spotifywidget/
 ├── hud/      WidgetRenderer, CoverArt
 ├── input/    MediaKeys
 ├── loader/   fabric/, forge/, neoforge/ entrypoints
-├── media/    Windows and Linux sources, cover lookup, controls
+├── media/    Windows, Linux and macOS sources, cover lookup, controls
 └── mixin/    HUD text and level event hooks
 ```
 

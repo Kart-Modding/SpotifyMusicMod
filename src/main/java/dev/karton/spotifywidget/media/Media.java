@@ -21,6 +21,7 @@ public final class Media {
     private static MediaSource create() {
         if (WindowsMediaSource.supported()) return new WindowsMediaSource();
         if (LinuxMediaSource.supported()) return new LinuxMediaSource();
+        if (MacMediaSource.supported()) return new MacMediaSource();
         return new UnsupportedSource();
     }
 
@@ -50,7 +51,7 @@ public final class Media {
 
         @Override
         public String status() {
-            return "Unsupported system - the widget reads the player on Windows and Linux";
+            return "Unsupported system - the widget reads the player on Windows, Linux and macOS";
         }
     }
 }

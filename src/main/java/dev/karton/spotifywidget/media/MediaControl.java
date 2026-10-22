@@ -15,7 +15,8 @@ import java.util.concurrent.Executors;
 /**
  * Sends playback commands to the player the system already talks to. On Windows a small PowerShell
  * helper drives the media session (and the volume keys); on Linux the MPRIS player is called
- * directly. Nothing here needs a Spotify account.
+ * directly; on macOS Spotify (or Apple Music) is told what to do through AppleScript. Nothing here
+ * needs a Spotify account.
  */
 public final class MediaControl {
     private static final String SCRIPT_RESOURCE = "/assets/spotifywidget/control.ps1";
@@ -74,6 +75,7 @@ public final class MediaControl {
             try {
                 if (WindowsMediaSource.supported()) sendWindows(command);
                 else if (LinuxMediaSource.supported()) sendLinux(command);
+                else if (MacMediaSource.supported()) sendMac(command);
                 else unavailable = true;
             } catch (Exception e) {
                 SpotifyWidgetClient.LOGGER.warn("Media command '{}' failed", command, e);
@@ -194,6 +196,30 @@ public final class MediaControl {
         }
     }
 
+    // --- macOS -----------------------------------------------------------------
+
+    private static void sendMac(String command) throws Exception {
+        String action = switch (command) {
+            case "next" -> "next track";
+            case "prev" -> "previous track";
+            case "playpause" -> "playpause";
+            case "play" -> "play";
+            case "pause" -> "pause";
+            case "volup" -> "set sound volume to ((sound volume) + 5)";
+            case "voldown" -> "set sound volume to ((sound volume) - 5)";
+            default -> null;
+        };
+        if (action == null) return;
+        List<String> apps = HudConfig.get().spotifyAppOnly ? List.of("Spotify") : List.of("Spotify", "Music");
+        for (String app : apps) {
+            // The "is running" guard keeps a command from launching a closed player
+            MacMediaSource.Result result = MacMediaSource.osascript(
+                    "if application \"" + app + "\" is not running then return \"none\"\n"
+                            + "tell application \"" + app + "\" to " + action);
+            if (result.ok() && !result.out().equals("none")) return;
+        }
+    }
+
     private static boolean run(String... command) {
         try {
             Process started = new ProcessBuilder(command).redirectErrorStream(true).start();
@@ -210,6 +236,7 @@ public final class MediaControl {
     /** Only used for log messages. */
     public static String platform() {
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        return os.contains("win") ? "Windows media session" : os.contains("linux") ? "MPRIS" : "unsupported";
+        return os.contains("win") ? "Windows media session" : os.contains("linux") ? "MPRIS"
+                : os.contains("mac") ? "AppleScript" : "unsupported";
     }
 }
