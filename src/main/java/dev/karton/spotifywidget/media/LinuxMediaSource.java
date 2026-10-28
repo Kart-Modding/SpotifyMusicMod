@@ -73,7 +73,7 @@ public final class LinuxMediaSource implements MediaSource {
     }
 
     private void runLoop() {
-        tool = hasCommand("gdbus", "--version") ? "gdbus"
+        tool = hasCommand("gdbus", "help") ? "gdbus"
                 : hasCommand("playerctl", "--version") ? "playerctl"
                 : null;
         if (tool == null) {
