@@ -27,7 +27,8 @@ Shows the song you're playing in a corner of the screen: album art, title, artis
 
 - **Windows:** reads the media session behind the volume flyout.
 - **Linux:** reads the Spotify MPRIS player through `gdbus` or `playerctl`.
-- **Album art:** looked up by artist and title on Deezer or iTunes. On Linux, Spotify provides the cover directly.
+- **macOS:** asks Spotify (or Apple Music) through AppleScript.
+- **Album art:** looked up by artist and title on Deezer or iTunes. On Linux and macOS, Spotify provides the cover directly.
 - **Client side only:** the mod never talks to the server you play on, so it works on any server.
 
 ---
@@ -49,7 +50,7 @@ Shows the song you're playing in a corner of the screen: album art, title, artis
 
 `+1.21.1` `+1.21.3` `+1.21.4` `+1.21.5` `+1.21.8` `+1.21.10` `+1.21.11` `+26.1.2` `+26.2` `+26.3`
 
-**Windows and Linux only.** macOS is not supported.
+**Windows, Linux and macOS.** On macOS, allow Minecraft to control Spotify when asked (System Settings → Privacy & Security → Automation).
 
 ---
 
