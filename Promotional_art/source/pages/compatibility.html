@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+    /* Matches stonecutter.properties.toml: Fabric/Quilt cover 1.21 and 1.21.2 too, NeoForge/Forge start at 1.21.1 and skip 1.21.2 */
+    .table { display: grid; grid-template-columns: 200px repeat(15, 1fr); column-gap: 7px; row-gap: 10px; align-items: center; }
+    .ver { text-align: center; font: 400 15px/20px 'DejaVu Sans Mono'; color: #b4b8c1; padding-bottom: 14px; }
+    .loader { display: flex; align-items: center; gap: 14px; }
+    .loader .dot { width: 16px; height: 16px; border-radius: 8px; }
+    .loader span { font: 800 26px/32px 'Inter'; letter-spacing: -0.3px; }
+    .cell { position: relative; height: 70px; border-radius: 10px; border: 1.5px solid; }
+    .cell svg { position: absolute; inset: 0; margin: auto; }
+    .cell.no { background: #15171c; border: 1.5px dashed #262a33; }
+    .cell.no::after { content: ''; position: absolute; left: 50%; top: 50%; width: 22px; height: 2px; margin: -1px 0 0 -11px; background: #3a3f4a; }
+    .fabric { background: #3d3835; border-color: #6e5f4c; }
+    .quilt { background: #31284b; border-color: #5b3fa0; }
+    .neoforge { background: #413128; border-color: #8a5530; }
+    .forge { background: #26314b; border-color: #3e5ea8; }
+    .foot { margin-top: 36px; font: 400 21px/28px 'Inter'; color: var(--sub); }
+    .foot b { font-weight: 700; color: var(--text); }
+</style></head>
+<body>
+<div class="page-bg" data-layer="Background"></div>
+<div class="wrap">
+    <div class="head" data-group="Heading">
+        <div class="eyebrow" data-layer="COMPATIBILITY" data-text>COMPATIBILITY</div>
+        <div class="title" data-layer="One mod, four loaders" data-text>One mod, four loaders</div>
+    </div>
+    <div class="table" id="table" data-group="Table"></div>
+    <div class="foot" data-layer="Footnote" data-text><b>Client-side only.</b> Windows, Linux and macOS · Fabric and Quilt need Fabric API (or QFAPI) · Mod Menu is optional, for the settings screen.</div>
+</div>
+<script>
+    const versions = ['1.21', '1.21.1', '1.21.2', '1.21.3', '1.21.4', '1.21.5', '1.21.6', '1.21.7', '1.21.8', '1.21.9', '1.21.10', '1.21.11', '26.1', '26.2', '26.3'];
+    const loaders = [
+        ['Fabric', 'fabric', v => true],
+        ['Quilt', 'quilt', v => true],
+        ['NeoForge', 'neoforge', v => v !== '1.21' && v !== '1.21.2'],
+        ['Forge', 'forge', v => v !== '1.21' && v !== '1.21.2'],
+    ];
+    const check = c => `<svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="var(--${c})" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 6 6L21 3"/></svg>`;
+    let html = '<div data-group="Version labels" style="display:contents"><div></div>' +
+        versions.map(v => `<div class="ver" data-layer="${v}" data-text>${v}</div>`).join('') + '</div>';
+    for (const [name, c, has] of loaders) {
+        html += `<div data-group="Row - ${name}" style="display:contents">` +
+            `<div class="loader"><div class="dot" style="background:var(--${c})" data-layer="Dot"></div><span data-layer="${name}" data-text>${name}</span></div>` +
+            versions.map(v => has(v)
+                ? `<div class="cell ${c}" data-layer="${v}">${check(c)}</div>`
+                : `<div class="cell no" data-layer="${v} - not available"></div>`).join('') + '</div>';
+    }
+    document.getElementById('table').innerHTML = html;
+</script>
+</body></html>

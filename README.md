@@ -1,38 +1,25 @@
-<div align="center">
+![Spoty Widget](Promotional_art/infographics/banner.png)
 
-<img src="docs/images/banner.svg" alt="Spoty Widget: your Spotify now playing in the Minecraft HUD" width="100%">
-
-[![Build](https://github.com/Kart-Modding/SpotifyMusicMod/actions/workflows/build.yml/badge.svg)](https://github.com/Kart-Modding/SpotifyMusicMod/actions/workflows/build.yml)
-[![Modrinth](https://img.shields.io/badge/Modrinth-Spoty%20Widget-1bd96a?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pjhN6TWN)
-[![CurseForge](https://img.shields.io/badge/CurseForge-Spoty%20Widget-f16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/spoty-widget)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21%20→%2026.3-62b47a)
-![Platforms](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-3a3a44)
-[![License](https://img.shields.io/github/license/Kart-Modding/SpotifyMusicMod?color=3a3a44)](LICENSE)
-
-**[Features](#features) · [Install](#install) · [Designs](#designs) · [Settings](#settings) · [Controls](#playback-controls) · [How it works](#how-it-works) · [Building](#building)**
-
-</div>
-
-Spoty Widget is a client-side mod for **Fabric, Quilt, NeoForge and Forge** by **Kartonek**. It shows the song
-you are playing in a corner of the screen (top left by default): album art, title, artist,
-elapsed/total time and a small animated equaliser. You no longer need to alt-tab to check the song.
+**See what's playing without leaving the game.** Spoty Widget puts your song in a corner of the screen: album art,
+title, artist and time, in one of eight designs.
 
 > [!NOTE]
 > **You do not need a Spotify account, API key or login.** The mod reads the "now playing" information that
 > the operating system already gets from the Spotify desktop app.
 
-## Features
+**Download:** [Modrinth](https://modrinth.com/mod/pjhN6TWN) | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/spoty-widget) | [GitHub Actions](https://github.com/Kart-Modding/SpotifyMusicMod/actions/workflows/build.yml)
 
-|   |   |
-|---|---|
-| 🎵 **Now playing in the HUD** | Album art, title, artist, a smooth timer and an equaliser |
-| 🎨 **8 designs** | Classic, Progress bar, Compact, Above hotbar, Vanilla tooltip, Card large, Card compact, Card thin |
-| 🖌️ **Your colours** | Colours from the album cover, or your own. Round corners on by default |
-| 🖱️ **Visual editor** | Drag the widget over the game to place it |
-| ⌨️ **Media keys in game** | Next/previous track and volume up/down, on the arrow keys by default |
-| 💿 **Jukebox aware** | A record that plays nearby takes over the widget and pauses Spotify |
-| 🔒 **Private** | Client only. It never talks to the server you play on |
-| 🧩 **Every loader** | Fabric, Quilt, NeoForge and Forge, Minecraft 1.21 to 26.3, all from one codebase |
+![How it works](Promotional_art/infographics/how-it-works.png)
+
+![Features](Promotional_art/infographics/features.png)
+
+![Designs](Promotional_art/infographics/designs.png)
+
+![Colours](Promotional_art/infographics/colours.png)
+
+![Settings](Promotional_art/infographics/settings.png)
+
+![Compatibility](Promotional_art/infographics/compatibility.png)
 
 ## Install
 
@@ -63,7 +50,7 @@ That is all the setup.
 ### Which jar do I need?
 
 Each row ships as `-fabric`, `-neoforge` and `-forge` jars, named
-`spotifywidget-<loader>-1.1.0+<version>.jar`. Quilt uses the Fabric jar.
+`spotifywidget-<loader>-<mod version>+<version>.jar`. Quilt uses the Fabric jar.
 
 | Jar suffix | Minecraft versions |
 |---|---|
@@ -78,24 +65,7 @@ Each row ships as `-fabric`, `-neoforge` and `-forge` jars, named
 | `+26.2` | 26.2 |
 | `+26.3` | 26.3 |
 
-## Designs
-
-<img src="docs/images/designs.svg" alt="The five widget designs: Classic, Progress bar, Compact, Above hotbar and Vanilla tooltip" width="100%">
-
-- **Classic**: 32px album art, title, artist, `00:15 / 03:45` and the animated equaliser.
-- **Progress bar**: the same art and two lines of text. Elapsed/total moves to the right of the artist
-  line, and a rounded green progress bar runs across the bottom of the panel.
-- **Compact**: one slim 26px row. It has 18px art, then `Title · Artist`, the remaining time (`-1:23`)
-  right-aligned, and a 2px progress bar along the whole bottom edge. The title dims while paused.
-  Use it with the 0.5x scale.
-- **Above hotbar**: no panel, only a centred line of text: `Title · Artist   00:15 / 03:45`. When enabled, the
-  equaliser is on its left. The line is one line above the vanilla held item name, which is above the
-  experience bar, so the two never overlap. This design ignores Corner. Offset Y moves the line higher and Hotbar shift moves it sideways.
-- **Vanilla tooltip**: looks like an item tooltip. It uses the game's `0xF0100010` box, purple gradient
-  border and white/grey/dark-grey text colours, with the album art where an item icon goes.
-  It ignores Background opacity, so it matches vanilla exactly.
-
-### When the widget shows
+## When the widget shows
 
 With **Always on**, the widget is visible whenever something is playing. With **15 seconds** or **5 seconds**,
 it shows for that long when a track starts and again before it ends. The two "Show at" toggles control each part.
@@ -263,6 +233,11 @@ src/main/java/dev/karton/spotifywidget/
 > ForgeGradle sets up every Forge node when Gradle configures, so the first build is slow.
 > Its mapping step needs a 64-bit Java 8. If an old 32-bit JDK 8 is installed, the step runs out of
 > memory. Set `JAVA_HOME_8_X64` to a 64-bit JDK 8, or remove the 32-bit one.
+
+## Art
+
+The infographics, their layered PSD files and the screenshots they use are in
+[`Promotional_art/`](Promotional_art/README.md). `MODRINTH.md` and `CURSEFORGE.md` are the mod page descriptions.
 
 ## License
 

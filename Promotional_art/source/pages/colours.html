@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .shot { width: 470px; height: 308px; border-radius: 18px; border: 1.5px solid var(--edge); overflow: hidden; }
+    .shot .crop { width: 100%; height: 100%; }
+    .name { display: block; width: fit-content; margin-top: 16px; font: 800 28px/34px 'Inter'; letter-spacing: -0.3px; }
+    .note { display: block; width: fit-content; margin-top: 4px; font: 400 21px/28px 'Inter'; color: var(--sub); }
+    .foot { margin-top: 40px; font: 400 21px/28px 'Inter'; color: var(--sub); }
+    .foot b { font-weight: 700; color: var(--text); }
+</style></head>
+<body>
+<div class="page-bg" data-layer="Background"></div>
+<div class="wrap">
+    <div class="head" data-group="Heading">
+        <div class="eyebrow" data-layer="COLOURS" data-text>COLOURS</div>
+        <div class="title" data-layer="Colours that follow the music" data-text>Colours that follow the music</div>
+    </div>
+    <div class="grid">
+        <div data-group="Green cover"><div class="shot" data-layer="Shot (20.06.07)"><div class="crop" style="--x:304;--y:404;--s:1.34"><img src="../../original/2026-11-04_20.06.07.png"></div></div>
+            <b class="name" data-layer="Green cover" data-text>Green cover</b><span class="note" data-layer="Green note" data-text>Green text and panel</span></div>
+        <div data-group="Blue cover"><div class="shot" data-layer="Shot (20.06.22)"><div class="crop" style="--x:304;--y:404;--s:1.34"><img src="../../original/2026-11-04_20.06.22.png"></div></div>
+            <b class="name" data-layer="Blue cover" data-text>Blue cover</b><span class="note" data-layer="Blue note" data-text>The whole card turns blue</span></div>
+        <div data-group="Grey cover"><div class="shot" data-layer="Shot (20.06.29)"><div class="crop" style="--x:304;--y:404;--s:1.34"><img src="../../original/2026-11-04_20.06.29.png"></div></div>
+            <b class="name" data-layer="Grey cover" data-text>Grey cover</b><span class="note" data-layer="Grey note" data-text>Calm covers stay calm</span></div>
+    </div>
+    <div class="foot" data-layer="Footnote" data-text><b>Your choice.</b> From album, the standard look, or your own colours with presets and a hex box.</div>
+</div>
+</body></html>

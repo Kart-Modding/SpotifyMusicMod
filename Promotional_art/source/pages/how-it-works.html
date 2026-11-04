@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+    .stage { position: relative; height: 516px; }
+    .widget { position: absolute; left: 332px; top: 0; width: 792px; height: 516px; border-radius: 72px; box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+    .widget .crop { width: 100%; height: 100%; border-radius: inherit; }
+    .mark { position: absolute; border: 3px dashed; border-radius: 16px; }
+    .line { position: absolute; height: 3px; }
+    .note { position: absolute; width: 270px; }
+    .note.left { left: 0; text-align: right; }
+    .note.right { left: 1186px; }
+    .note b { display: block; font: 800 26px/32px 'Inter'; letter-spacing: -0.3px; }
+    .note span { display: block; margin-top: 6px; font: 400 20px/28px 'Inter'; color: var(--sub); }
+    .green { color: #7ee8a0; } .pink { color: #ffb8f0; } .blue { color: #7cc4ff; } .yellow { color: var(--yellow); }
+</style></head>
+<body>
+<div class="page-bg" data-layer="Background"></div>
+<div class="wrap">
+    <div class="head" data-group="Heading">
+        <div class="eyebrow" data-layer="HOW IT WORKS" data-text>HOW IT WORKS</div>
+        <div class="title" data-layer="Your song, always in view" data-text>Your song, always in view</div>
+    </div>
+    <div class="stage">
+        <div class="widget" data-layer="Widget (20.05.33)"><div class="crop" style="--x:36;--y:36;--s:1"><img src="../../original/2026-11-04_20.05.33.png"></div></div>
+
+        <div data-group="Album art">
+            <div class="mark" style="left:350px; top:18px; width:756px; height:250px; border-color:#7ee8a0" data-layer="Marker"></div>
+            <div class="line" style="left:274px; top:120px; width:76px; background:#7ee8a0" data-layer="Line"></div>
+            <div class="note left" style="top:60px"><b class="green" data-layer="Album art" data-text>Album art</b><span data-layer="Album art note" data-text>Picked up by itself, no account or API key</span></div>
+        </div>
+        <div data-group="Song and artist">
+            <div class="mark" style="left:520px; top:278px; width:416px; height:134px; border-color:#7cc4ff" data-layer="Marker"></div>
+            <div class="line" style="left:274px; top:345px; width:246px; background:#7cc4ff" data-layer="Line"></div>
+            <div class="note left" style="top:296px"><b class="blue" data-layer="Song and artist" data-text>Song and artist</b><span data-layer="Song note" data-text>Long names scroll or get cut, you choose</span></div>
+        </div>
+        <div data-group="Live time">
+            <div class="mark" style="left:366px; top:414px; width:724px; height:72px; border-color:var(--yellow)" data-layer="Marker"></div>
+            <div class="line" style="left:1090px; top:450px; width:92px; background:var(--yellow)" data-layer="Line"></div>
+            <div class="note right" style="top:400px"><b class="yellow" data-layer="Live time" data-text>Live time</b><span data-layer="Live time note" data-text>A smooth timer and progress bar</span></div>
+        </div>
+    </div>
+</div>
+</body></html>

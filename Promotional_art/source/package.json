@@ -1,0 +1,16 @@
+{
+  "name": "spoty-widget-promo",
+  "private": true,
+  "description": "Builds the infographics in ../infographics (PNG + layered PSD) from pages/*.html",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.2.8",
+    "ag-psd": "27.0.0",
+    "dejavu-fonts-ttf": "2.37.3",
+    "lucide-static": "1.68.0",
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0"
+  }
+}

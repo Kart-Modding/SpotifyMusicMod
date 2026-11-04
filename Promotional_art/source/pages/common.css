@@ -1,0 +1,51 @@
+/* Shared look for every infographic: same palette and type as the HeadTracker and PaperDoll pages */
+@font-face { font-family: 'Inter'; font-weight: 400; src: url(../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2); }
+@font-face { font-family: 'Inter'; font-weight: 500; src: url(../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2); }
+@font-face { font-family: 'Inter'; font-weight: 600; src: url(../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2); }
+@font-face { font-family: 'Inter'; font-weight: 700; src: url(../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff2); }
+@font-face { font-family: 'Inter'; font-weight: 800; src: url(../node_modules/@fontsource/inter/files/inter-latin-800-normal.woff2); }
+@font-face { font-family: 'Inter'; font-weight: 900; src: url(../node_modules/@fontsource/inter/files/inter-latin-900-normal.woff2); }
+@font-face { font-family: 'DejaVu Sans Mono'; src: url(../node_modules/dejavu-fonts-ttf/ttf/DejaVuSansMono.ttf); }
+
+:root {
+    --bg: #111318;
+    --card: #1a1d24;
+    --edge: #2a2f3a;
+    --tile: #0c0e12;
+    --text: #f2f3f5;
+    --sub: #9aa0ab;
+    --yellow: #ffcc4d;
+    --fabric: #dbb585;
+    --quilt: #9b59ff;
+    --neoforge: #f48a3c;
+    --forge: #5b8cff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); }
+body {
+    position: relative;
+    width: 1600px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+.page-bg { position: absolute; inset: 0; background: var(--bg); }
+.wrap { position: relative; padding: 72px 72px 80px; }
+
+.eyebrow { display: inline-block; font: 800 18px/22px 'Inter'; letter-spacing: 3.6px; color: var(--yellow); }
+.title { display: inline-block; font: 800 52px/64px 'Inter'; letter-spacing: -0.8px; color: var(--text); }
+.head { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; margin-bottom: 48px; }
+
+/* A window onto one of the screenshots in ../../original (1920x1200):
+   --x/--y is the top-left of the area shown, --s the scale it is drawn at */
+.crop { position: relative; overflow: hidden; }
+.crop img {
+    position: absolute;
+    width: calc(1920px * var(--s));
+    left: calc(var(--x) * -1px * var(--s));
+    top: calc(var(--y) * -1px * var(--s));
+}
+
+.card { background: var(--card); border: 1.5px solid var(--edge); border-radius: 22px; }

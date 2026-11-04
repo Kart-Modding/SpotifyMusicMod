@@ -1,0 +1,59 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="common.css">
+<style>
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .item { position: relative; display: flex; align-items: center; gap: 26px; height: 190px; padding: 0 28px 0 34px; }
+    .item .box { position: absolute; inset: 0; }
+    .tile { position: relative; flex: none; width: 108px; height: 108px; border-radius: 20px; background: var(--tile); border: 1.5px solid #1f232b; overflow: hidden; }
+    .tile svg { position: absolute; inset: 0; margin: auto; }
+    .tile .crop { position: absolute; inset: 14px; border-radius: 12px; }
+    .words { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .words b { display: inline-block; font: 800 30px/36px 'Inter'; letter-spacing: -0.4px; }
+    .words span { display: inline-block; width: 256px; font: 400 22px/30px 'Inter'; color: var(--sub); }
+</style></head>
+<body>
+<div class="page-bg" data-layer="Background"></div>
+<div class="wrap">
+    <div class="head" data-group="Heading">
+        <div class="eyebrow" data-layer="FEATURES" data-text>FEATURES</div>
+        <div class="title" data-layer="Everything at a glance" data-text>Everything at a glance</div>
+    </div>
+    <div class="grid">
+        <div class="item" data-group="Now playing"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#7ee8a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19" /><circle cx="18" cy="16" r="3" /><circle cx="6" cy="19" r="3" /></svg></div>
+            <div class="words"><b data-layer="Now playing" data-text>Now playing</b><span data-layer="Now playing note" data-text>Art, song, artist and time on your HUD</span></div></div>
+
+        <div class="item" data-group="8 designs"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffcc4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="7" x="3" y="3" rx="1" /><rect width="9" height="7" x="3" y="14" rx="1" /><rect width="5" height="7" x="16" y="14" rx="1" /></svg></div>
+            <div class="words"><b data-layer="8 designs" data-text>8 designs</b><span data-layer="8 designs note" data-text>From full cards to one thin line</span></div></div>
+
+        <div class="item" data-group="Album colours"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffb8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></svg></div>
+            <div class="words"><b data-layer="Album colours" data-text>Album colours</b><span data-layer="Album colours note" data-text>Or pick your own, with presets</span></div></div>
+
+        <div class="item" data-group="Visual editor"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffcc4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20" /><path d="m15 19-3 3-3-3" /><path d="m19 9 3 3-3 3" /><path d="M2 12h20" /><path d="m5 9-3 3 3 3" /><path d="m9 5 3-3 3 3" /></svg></div>
+            <div class="words"><b data-layer="Visual editor" data-text>Visual editor</b><span data-layer="Visual editor note" data-text>Drag it anywhere, scroll to resize</span></div></div>
+
+        <div class="item" data-group="Media keys"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#f2f3f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4v16" /><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" /></svg></div>
+            <div class="words"><b data-layer="Media keys" data-text>Media keys</b><span data-layer="Media keys note" data-text>Skip and change volume in game</span></div></div>
+
+        <div class="item" data-group="Jukebox aware"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#7ee8a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M6 12c0-1.7.7-3.2 1.8-4.2" /><circle cx="12" cy="12" r="2" /><path d="M18 12c0 1.7-.7 3.2-1.8 4.2" /></svg></div>
+            <div class="words"><b data-layer="Jukebox aware" data-text>Jukebox aware</b><span data-layer="Jukebox note" data-text>Spotify pauses while a record plays</span></div></div>
+
+        <div class="item" data-group="Live settings"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#7cc4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></svg></div>
+            <div class="words"><b data-layer="Live settings" data-text>Live settings</b><span data-layer="Live settings note" data-text>Search them and watch the preview</span></div></div>
+
+        <div class="item" data-group="No login"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ffcc4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg></div>
+            <div class="words"><b data-layer="No login" data-text>No login</b><span data-layer="No login note" data-text>No Spotify account or API key</span></div></div>
+
+        <div class="item" data-group="Client-side"><div class="box card" data-layer="Card"></div>
+            <div class="tile" data-layer="Icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#55e02c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg></div>
+            <div class="words"><b data-layer="Client-side" data-text>Client-side</b><span data-layer="Client-side note" data-text>Works on any server, nothing to install there</span></div></div>
+    </div>
+</div>
+</body></html>
