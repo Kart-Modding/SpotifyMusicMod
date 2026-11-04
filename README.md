@@ -85,12 +85,12 @@ Each row ships as `-fabric`, `-neoforge` and `-forge` jars, named
 - **Classic**: 32px album art, title, artist, `00:15 / 03:45` and the animated equaliser.
 - **Progress bar**: the same art and two lines of text. Elapsed/total moves to the right of the artist
   line, and a rounded green progress bar runs across the bottom of the panel.
-- **Compact**: one slim 22px row. It has 16px art, then `Title · Artist`, the remaining time (`-1:23`)
-  right-aligned, and a 2px progress line along the bottom edge. The title dims while paused.
+- **Compact**: one slim 26px row. It has 18px art, then `Title · Artist`, the remaining time (`-1:23`)
+  right-aligned, and a 2px progress bar along the whole bottom edge. The title dims while paused.
   Use it with the 0.5x scale.
 - **Above hotbar**: no panel, only a centred line of text: `Title · Artist   00:15 / 03:45`. When enabled, the
   equaliser is on its left. The line is one line above the vanilla held item name, which is above the
-  experience bar, so the two never overlap. This design ignores Corner. Offset Y moves the line higher.
+  experience bar, so the two never overlap. This design ignores Corner. Offset Y moves the line higher and Hotbar shift moves it sideways.
 - **Vanilla tooltip**: looks like an item tooltip. It uses the game's `0xF0100010` box, purple gradient
   border and white/grey/dark-grey text colours, with the album art where an item icon goes.
   It ignores Background opacity, so it matches vanilla exactly.

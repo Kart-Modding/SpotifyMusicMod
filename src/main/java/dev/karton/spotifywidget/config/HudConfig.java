@@ -47,6 +47,8 @@ public final class HudConfig {
     public HudCorner corner = HudCorner.TOP_LEFT;
     public int offsetX = 6;
     public int offsetY = 6;
+    /** Above hotbar only: sideways distance from the centre of the screen. */
+    public int hotbarShift = 0;
     public float scale = 1.0f;
     public int backgroundOpacity = 88; // percent
     public boolean showAlbumArt = true;
@@ -133,6 +135,7 @@ public final class HudConfig {
             config.corner = HudCorner.byId(string(json, "corner", config.corner.id()), config.corner);
             config.offsetX = integer(json, "offsetX", config.offsetX);
             config.offsetY = integer(json, "offsetY", config.offsetY);
+            config.hotbarShift = integer(json, "hotbarShift", config.hotbarShift);
             config.scale = (float) number(json, "scale", config.scale);
             config.backgroundOpacity = integer(json, "backgroundOpacity", config.backgroundOpacity);
             config.showAlbumArt = bool(json, "showAlbumArt", config.showAlbumArt);
@@ -180,6 +183,7 @@ public final class HudConfig {
         json.addProperty("corner", corner.id());
         json.addProperty("offsetX", offsetX);
         json.addProperty("offsetY", offsetY);
+        json.addProperty("hotbarShift", hotbarShift);
         json.addProperty("scale", scale);
         json.addProperty("backgroundOpacity", backgroundOpacity);
         json.addProperty("showAlbumArt", showAlbumArt);

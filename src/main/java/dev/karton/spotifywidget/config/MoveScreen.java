@@ -17,6 +17,8 @@ import net.minecraft.client.input.MouseButtonEvent;
 //?}
 import net.minecraft.network.chat.Component;
 
+import java.util.Locale;
+
 /**
  * Visual editor, in the spirit of PaperDoll's: the widget sits over the game with guide lines, and
  * is dragged into place. The result is stored as the nearest corner plus offsets, so it stays put
@@ -27,6 +29,7 @@ public class MoveScreen extends Screen {
     private static final int GUIDE_SNAPPED = 0xFFFFFF55;
     private static final int MARGIN = 10;
     private static final int SNAP = 4;
+    private static final int GRAB_MARGIN = 3;
     private static final int BAR_HEIGHT = 38;
     private static final String HINT = "Drag to move. Scroll to resize. Arrows nudge. Shift turns off snapping.";
 
@@ -62,6 +65,7 @@ public class MoveScreen extends Screen {
         config.offsetX = defaults.offsetX;
         config.offsetY = defaults.offsetY;
         config.scale = defaults.scale;
+        config.hotbarShift = defaults.hotbarShift;
     }
 
     private int[] box() {
@@ -114,8 +118,11 @@ public class MoveScreen extends Screen {
     }
 
     static String placement(HudConfig config) {
-        return config.corner.label() + ", X " + config.offsetX + ", Y " + config.offsetY
-                + ", " + String.format("%.2fx", config.scale);
+        String scale = String.format(Locale.ROOT, "%.2fx", config.scale);
+        if (config.layout == WidgetLayout.HOTBAR) {
+            return "Above hotbar, X " + config.hotbarShift + ", Y " + config.offsetY + ", " + scale;
+        }
+        return config.corner.label() + ", X " + config.offsetX + ", Y " + config.offsetY + ", " + scale;
     }
 
     private void place(double x0, double y0, int boxWidth, int boxHeight) {
@@ -123,8 +130,9 @@ public class MoveScreen extends Screen {
         double top = Math.max(0, Math.min(y0, this.height - boxHeight));
         float scale = config.scale;
         if (config.layout == WidgetLayout.HOTBAR) {
-            // Always centred, so only the height can change
+            // Anchored to the middle of the hotbar, not to a corner
             int[] box = box();
+            config.hotbarShift = (int) Math.round(config.hotbarShift + (left - box[0]) / scale);
             config.offsetY = (int) Math.round(config.offsetY + (box[1] - top) / scale);
             return;
         }
@@ -151,7 +159,8 @@ public class MoveScreen extends Screen {
 
     private boolean grab(double mouseX, double mouseY) {
         int[] box = box();
-        if (mouseX < box[0] || mouseX >= box[2] || mouseY < box[1] || mouseY >= box[3]) return false;
+        if (mouseX < box[0] - GRAB_MARGIN || mouseX >= box[2] + GRAB_MARGIN
+                || mouseY < box[1] - GRAB_MARGIN || mouseY >= box[3] + GRAB_MARGIN) return false;
         dragging = true;
         grabX = mouseX - box[0];
         grabY = mouseY - box[1];

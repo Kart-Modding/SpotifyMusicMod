@@ -586,7 +586,8 @@ public final class WidgetRenderer {
 
     /**
      * No panel at all: a centred line of text where vanilla shows the held item name, which sits
-     * above the experience bar and status bars. Corner is ignored, the offset lifts it further up.
+     * above the experience bar and status bars. Corner is ignored, the offset lifts it further up
+     * and the hotbar shift moves it sideways.
      */
     private static void drawHotbarLine(Canvas canvas, HudConfig config, Track track, float alpha, long now) {
         final String dot = "·";
@@ -608,7 +609,7 @@ public final class WidgetRenderer {
         int screenWidth = Math.round(canvas.screenWidth() / scale);
         int screenHeight = Math.round(canvas.screenHeight() / scale);
 
-        int x = (screenWidth - (width + barsWidth)) / 2;
+        int x = (screenWidth - (width + barsWidth)) / 2 + config.hotbarShift;
         // Vanilla draws the held item name at guiHeight - 59, or 14 lower in creative and spectator
         // where the health and experience rows are gone. Sit one line above whichever it is, so the
         // two never print on top of each other when you switch items.

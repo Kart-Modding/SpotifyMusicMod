@@ -239,12 +239,19 @@ public class ConfigScreen extends Screen {
 
         all.add(section("Position"));
         all.add(action("Visual editor", "Move on screen", "Drag the widget over the game. Scroll to resize.", this::openEditor));
+        BooleanSupplier cornered = () -> config.layout != WidgetLayout.HOTBAR;
         all.add(choice("Corner", "Which screen corner the widget sits in.", HudCorner.values(),
-                () -> config.corner, v -> config.corner = v, defaults.corner));
+                () -> config.corner, v -> config.corner = v, defaults.corner)
+                .when(cornered, "Above hotbar sits over the hotbar, not in a corner."));
         all.add(slider("Scale", "Size of the widget.", 0.5, 2, 0.05,
                 () -> config.scale, v -> config.scale = (float) v, v -> String.format(Locale.ROOT, "%.2fx", v), defaults.scale));
         all.add(slider("Offset X", "Distance from the screen edge.", 0, Math.max(100, this.width), 1,
-                () -> config.offsetX, v -> config.offsetX = (int) v, v -> String.valueOf((int) v), defaults.offsetX));
+                () -> config.offsetX, v -> config.offsetX = (int) v, v -> String.valueOf((int) v), defaults.offsetX)
+                .when(cornered, "Above hotbar uses Hotbar shift."));
+        all.add(slider("Hotbar shift", "Sideways distance from the middle of the screen.",
+                -Math.max(100, this.width / 2), Math.max(100, this.width / 2), 1,
+                () -> config.hotbarShift, v -> config.hotbarShift = (int) v, v -> String.valueOf((int) v), defaults.hotbarShift)
+                .when(() -> config.layout == WidgetLayout.HOTBAR, "Only for Above hotbar."));
         all.add(slider("Offset Y", "Distance from the screen edge.", -12, Math.max(100, this.height), 1,
                 () -> config.offsetY, v -> config.offsetY = (int) v, v -> String.valueOf((int) v), defaults.offsetY));
         all.add(slider("Background", "Opacity of the widget background.", 0, 100, 1,
