@@ -1,7 +1,7 @@
 package dev.karton.spotifywidget.config;
 
 /** How long the HUD stays on screen. */
-public enum DisplayMode {
+public enum DisplayMode implements Choice {
     /** Always visible while something is playing. */
     ALWAYS("always", -1),
     /** Visible for 15 seconds around the configured triggers. */

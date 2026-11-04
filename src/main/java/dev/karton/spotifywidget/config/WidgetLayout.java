@@ -1,7 +1,7 @@
 package dev.karton.spotifywidget.config;
 
 /** Shape of the widget. */
-public enum WidgetLayout {
+public enum WidgetLayout implements Choice {
     /** Album art, title, artist, elapsed/total and an equaliser. */
     CLASSIC("classic"),
     /** Album art, title, artist and a progress bar across the bottom. */
@@ -11,7 +11,13 @@ public enum WidgetLayout {
     /** No panel: a centred line of text above the hotbar, where item names appear. */
     HOTBAR("hotbar"),
     /** Drawn like a vanilla tooltip: dark box, purple gradient border, vanilla text colours. */
-    VANILLA("vanilla");
+    VANILLA("vanilla"),
+    /** Wide cover banner above the title, artist and progress bar. */
+    CARD_LARGE("card_large"),
+    /** Cover, one line of text and a progress bar underneath. */
+    CARD_COMPACT("card_compact"),
+    /** A slim pill: play state, one line of text and a small progress bar. */
+    CARD_THIN("card_thin");
 
     private final String id;
 
@@ -30,7 +36,19 @@ public enum WidgetLayout {
             case COMPACT -> "Compact";
             case HOTBAR -> "Above hotbar";
             case VANILLA -> "Vanilla tooltip";
+            case CARD_LARGE -> "Card large";
+            case CARD_COMPACT -> "Card compact";
+            case CARD_THIN -> "Card thin";
         };
+    }
+
+    public boolean card() {
+        return this == CARD_LARGE || this == CARD_COMPACT || this == CARD_THIN;
+    }
+
+    /** Above hotbar and Vanilla tooltip keep their own colours. */
+    public boolean themed() {
+        return this != HOTBAR && this != VANILLA;
     }
 
     public WidgetLayout next() {

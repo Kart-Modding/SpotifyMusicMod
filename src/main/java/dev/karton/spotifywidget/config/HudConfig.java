@@ -57,6 +57,37 @@ public final class HudConfig {
     /** Hide the widget while the player is paused. */
     public boolean hidePaused = false;
 
+    /** Smooth corners drawn at screen pixels. Off gives Minecraft pixel steps. */
+    public boolean roundCorners = true;
+    /** Longest the widget may get in GUI pixels. Longer names are cut or scrolled. */
+    public int maxWidth = 240;
+
+    public ThemeMode theme = ThemeMode.ALBUM;
+    /** Preset last used as the start for custom colours. */
+    public String palette = "Lilac";
+    public int colorPanel = 0x262048;
+    public int colorTitle = 0xE6BDFF;
+    public int colorArtist = 0xD9D6EE;
+    public int colorBarStart = 0x8F7BFF;
+    public int colorBarEnd = 0xFFB8F0;
+    public int colorDetails = 0xFFB8F0;
+
+    public boolean animations = true;
+    public PopupStyle popupStyle = PopupStyle.SLIDE;
+    /** Seconds the pop-up animation takes. */
+    public float animationTime = 0.5f;
+    public boolean dimPaused = true;
+    /** Hide the widget after a long pause. */
+    public boolean hideIdle = true;
+    public int idleMinutes = 3;
+
+    public TextCase textCase = TextCase.NONE;
+    public LongText longText = LongText.SCROLL;
+    /** GUI pixels per second. */
+    public int scrollSpeed = 18;
+    /** Seconds the text rests at each end of the scroll. */
+    public float scrollHold = 1.5f;
+
     public static HudConfig get() {
         if (instance == null) instance = load();
         return instance;
@@ -109,6 +140,26 @@ public final class HudConfig {
             config.showWaveform = bool(json, "showWaveform", config.showWaveform);
             config.hideWithGui = bool(json, "hideWithGui", config.hideWithGui);
             config.hidePaused = bool(json, "hidePaused", config.hidePaused);
+            config.roundCorners = bool(json, "roundCorners", config.roundCorners);
+            config.maxWidth = integer(json, "maxWidth", config.maxWidth);
+            config.theme = Choice.byId(ThemeMode.values(), string(json, "theme", config.theme.id()), config.theme);
+            config.palette = string(json, "palette", config.palette);
+            config.colorPanel = integer(json, "colorPanel", config.colorPanel);
+            config.colorTitle = integer(json, "colorTitle", config.colorTitle);
+            config.colorArtist = integer(json, "colorArtist", config.colorArtist);
+            config.colorBarStart = integer(json, "colorBarStart", config.colorBarStart);
+            config.colorBarEnd = integer(json, "colorBarEnd", config.colorBarEnd);
+            config.colorDetails = integer(json, "colorDetails", config.colorDetails);
+            config.animations = bool(json, "animations", config.animations);
+            config.popupStyle = Choice.byId(PopupStyle.values(), string(json, "popupStyle", config.popupStyle.id()), config.popupStyle);
+            config.animationTime = (float) number(json, "animationTime", config.animationTime);
+            config.dimPaused = bool(json, "dimPaused", config.dimPaused);
+            config.hideIdle = bool(json, "hideIdle", config.hideIdle);
+            config.idleMinutes = integer(json, "idleMinutes", config.idleMinutes);
+            config.textCase = Choice.byId(TextCase.values(), string(json, "textCase", config.textCase.id()), config.textCase);
+            config.longText = Choice.byId(LongText.values(), string(json, "longText", config.longText.id()), config.longText);
+            config.scrollSpeed = integer(json, "scrollSpeed", config.scrollSpeed);
+            config.scrollHold = (float) number(json, "scrollHold", config.scrollHold);
         } catch (Exception e) {
             SpotifyWidgetClient.LOGGER.warn("Could not read spotifywidget.json, using defaults", e);
         }
@@ -136,6 +187,26 @@ public final class HudConfig {
         json.addProperty("showWaveform", showWaveform);
         json.addProperty("hideWithGui", hideWithGui);
         json.addProperty("hidePaused", hidePaused);
+        json.addProperty("roundCorners", roundCorners);
+        json.addProperty("maxWidth", maxWidth);
+        json.addProperty("theme", theme.id());
+        json.addProperty("palette", palette);
+        json.addProperty("colorPanel", colorPanel);
+        json.addProperty("colorTitle", colorTitle);
+        json.addProperty("colorArtist", colorArtist);
+        json.addProperty("colorBarStart", colorBarStart);
+        json.addProperty("colorBarEnd", colorBarEnd);
+        json.addProperty("colorDetails", colorDetails);
+        json.addProperty("animations", animations);
+        json.addProperty("popupStyle", popupStyle.id());
+        json.addProperty("animationTime", animationTime);
+        json.addProperty("dimPaused", dimPaused);
+        json.addProperty("hideIdle", hideIdle);
+        json.addProperty("idleMinutes", idleMinutes);
+        json.addProperty("textCase", textCase.id());
+        json.addProperty("longText", longText.id());
+        json.addProperty("scrollSpeed", scrollSpeed);
+        json.addProperty("scrollHold", scrollHold);
         try {
             Path path = path();
             Files.createDirectories(path.getParent());

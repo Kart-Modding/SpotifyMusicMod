@@ -54,6 +54,8 @@ dependencies {
 
     // Config screen integration - optional at runtime
     modCompileOnly("maven.modrinth:modmenu:${property("deps.modmenu")}")
+    // Lets dev runs open the settings screen
+    modLocalRuntime("maven.modrinth:modmenu:${property("deps.modmenu")}")
 }
 
 loom {

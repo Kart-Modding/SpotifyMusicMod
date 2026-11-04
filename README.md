@@ -26,7 +26,9 @@ elapsed/total time and a small animated equaliser. You no longer need to alt-tab
 |   |   |
 |---|---|
 | 🎵 **Now playing in the HUD** | Album art, title, artist, a smooth timer and an equaliser |
-| 🎨 **5 designs** | Classic, Progress bar, Compact, Above hotbar, Vanilla tooltip |
+| 🎨 **8 designs** | Classic, Progress bar, Compact, Above hotbar, Vanilla tooltip, Card large, Card compact, Card thin |
+| 🖌️ **Your colours** | Colours from the album cover, or your own. Round corners on by default |
+| 🖱️ **Visual editor** | Drag the widget over the game to place it |
 | ⌨️ **Media keys in game** | Next/previous track and volume up/down, on the arrow keys by default |
 | 💿 **Jukebox aware** | A record that plays nearby takes over the widget and pauses Spotify |
 | 🔒 **Private** | Client only. It never talks to the server you play on |
@@ -116,18 +118,27 @@ gantt
 Open the settings from Mod Menu (Fabric/Quilt) or from the config button on the Mods screen (NeoForge/Forge),
 then choose Spoty Widget. You can also edit `config/spotifywidget.json`.
 
+The screen shows a live preview on the left and a searchable list on the right. **Move on screen** opens a
+visual editor: drag the widget, scroll to resize, arrow keys nudge, and it snaps to the guide lines unless you
+hold Shift.
+
 <details>
 <summary><b>All options</b> (click to expand)</summary>
 
 | Setting | Default | Notes |
 |---|---|---|
 | Widget | ON | Master switch |
-| Design | Classic | `Classic`, `Progress bar`, `Compact`, `Above hotbar`, `Vanilla tooltip` |
+| Design | Classic | `Classic`, `Progress bar`, `Compact`, `Above hotbar`, `Vanilla tooltip`, `Card large`, `Card compact`, `Card thin` |
+| Round corners | ON | Smooth corners. Off gives Minecraft pixel steps |
+| Max width | 240 px | Longer names are cut or scrolled |
+| Theme | From album | `Default`, `From album`, `Custom`. Not for Above hotbar and Vanilla tooltip |
+| Start from | Lilac | Fills the custom colours from a preset |
+| Colours | Lilac preset | Background, song, artist, progress start and end, details |
 | Display | Always on | `Always on`, `15 seconds`, `5 seconds` |
 | Show at song start | ON | Timed modes: show when a track starts |
 | Show at song end | ON | Timed modes: show for the last seconds of a track |
 | Corner | Top left | Any of the four corners |
-| Scale | 1.00x | 0.5x, 0.75x, 1x, 1.25x, 1.5x, 2x |
+| Scale | 1.00x | 0.5x to 2x |
 | Offset X / Y | 6 / 6 | Distance from the corner |
 | Background | 88% | Panel opacity |
 | Album art | ON | |
@@ -135,6 +146,11 @@ then choose Spoty Widget. You can also edit `config/spotifywidget.json`.
 | Equaliser bars | ON | Animates while playing |
 | Hide while a menu is open | OFF | |
 | Hide when paused | OFF | Hides the widget while playback is paused |
+| Dim when paused | ON | Fades the widget while paused |
+| Hide when idle | ON | Hides it after 3 minutes paused, adjustable |
+| Animations | ON | Pop-up style `Slide`, `Rise`, `Scale`, `Fade`, and its duration |
+| Case | As released | `UPPERCASE`, `lowercase`, `Capitalise` |
+| Long text | Scroll | Compact and cards: scroll or cut. Scroll speed and wait are adjustable |
 | Jukebox in widget | ON | Show a playing record instead of the desktop player |
 | Pause for jukebox | ON | Pause Spotify while a record plays and resume when it ends |
 | Player | Spotify only | Set to "Any player" to also read browsers, VLC, etc. |

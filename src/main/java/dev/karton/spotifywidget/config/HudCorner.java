@@ -1,7 +1,7 @@
 package dev.karton.spotifywidget.config;
 
 /** Screen corner the HUD is anchored to. */
-public enum HudCorner {
+public enum HudCorner implements Choice {
     TOP_LEFT("top_left"),
     TOP_RIGHT("top_right"),
     BOTTOM_LEFT("bottom_left"),

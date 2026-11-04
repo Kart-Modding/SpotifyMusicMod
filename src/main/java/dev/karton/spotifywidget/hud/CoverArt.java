@@ -27,6 +27,10 @@ public final class CoverArt {
     /** Album art is drawn at 32 GUI pixels; the texture is kept at twice that for sharper scaling. */
     public static final int TEXTURE_SIZE = 64;
     private static final int CORNER_RADIUS = 8;
+    /** Top of the large card: three texture pixels per GUI pixel, 132 x 46. */
+    public static final int BANNER_WIDTH = 396;
+    public static final int BANNER_HEIGHT = 138;
+    private static final int BANNER_RADIUS = 36;
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
@@ -41,6 +45,9 @@ public final class CoverArt {
     private static final Map<String, Identifier> READY = new ConcurrentHashMap<>();
     private static final Map<String, int[]> DECODED = new ConcurrentHashMap<>();
     private static final Map<String, Boolean> IN_FLIGHT = new ConcurrentHashMap<>();
+    private static final Map<String, Identifier> BANNERS = new ConcurrentHashMap<>();
+    private static final Map<String, int[]> DECODED_BANNERS = new ConcurrentHashMap<>();
+    private static final Map<String, Theme> THEMES = new ConcurrentHashMap<>();
 
     private CoverArt() {
     }
@@ -49,6 +56,18 @@ public final class CoverArt {
     public static Identifier get(String key) {
         if (key == null || key.isBlank()) return null;
         return READY.get(key);
+    }
+
+    /** Wide crop of the cover for the large card, or null while it is on its way. */
+    public static Identifier banner(String key) {
+        if (key == null || key.isBlank()) return null;
+        return BANNERS.get(key);
+    }
+
+    /** Colours picked from this cover, or null while it is on its way. */
+    public static Theme theme(String key) {
+        if (key == null || key.isBlank()) return null;
+        return THEMES.get(key);
     }
 
     /** Registers artwork to download for a cache key. Ignored when that key is already known. */
@@ -68,10 +87,17 @@ public final class CoverArt {
         for (String key : DECODED.keySet().toArray(new String[0])) {
             int[] pixels = DECODED.remove(key);
             if (pixels == null) continue;
-            Identifier id = Textures.upload("cover_" + Integer.toHexString(key.hashCode()), pixels, TEXTURE_SIZE);
+            String name = Integer.toHexString(key.hashCode());
+            Identifier id = Textures.upload("cover_" + name, pixels, TEXTURE_SIZE);
             if (id == null) continue;
             Identifier previous = READY.put(key, id);
             if (previous != null && !previous.equals(id)) Textures.release(previous);
+            int[] banner = DECODED_BANNERS.remove(key);
+            if (banner != null) {
+                Identifier bannerId = Textures.upload("banner_" + name, banner, BANNER_WIDTH, BANNER_HEIGHT);
+                Identifier previousBanner = bannerId == null ? null : BANNERS.put(key, bannerId);
+                if (previousBanner != null && !previousBanner.equals(bannerId)) Textures.release(previousBanner);
+            }
             trim(key);
         }
     }
@@ -83,6 +109,9 @@ public final class CoverArt {
             if (entry.getKey().equals(keep)) continue;
             READY.remove(entry.getKey());
             Textures.release(entry.getValue());
+            THEMES.remove(entry.getKey());
+            Identifier banner = BANNERS.remove(entry.getKey());
+            if (banner != null) Textures.release(banner);
             if (READY.size() <= 4) return;
         }
     }
@@ -100,6 +129,8 @@ public final class CoverArt {
             }
             BufferedImage source = ImageIO.read(new ByteArrayInputStream(response.body()));
             if (source == null) return;
+            THEMES.put(key, Theme.fromPixels(square(source, 24)));
+            DECODED_BANNERS.put(key, toBannerArgb(source));
             DECODED.put(key, toRoundedArgb(source));
         } catch (Exception e) {
             SpotifyWidgetClient.LOGGER.warn("Album art download failed", e);
@@ -108,16 +139,47 @@ public final class CoverArt {
         }
     }
 
-    /** Scales to {@link #TEXTURE_SIZE}, then feathers the corners into a rounded square. */
-    private static int[] toRoundedArgb(BufferedImage source) {
-        BufferedImage scaled = new BufferedImage(TEXTURE_SIZE, TEXTURE_SIZE, BufferedImage.TYPE_INT_ARGB);
+    private static int[] square(BufferedImage source, int size) {
+        BufferedImage scaled = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = scaled.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        graphics.drawImage(source, 0, 0, TEXTURE_SIZE, TEXTURE_SIZE, null);
+        graphics.drawImage(source, 0, 0, size, size, null);
+        graphics.dispose();
+        return scaled.getRGB(0, 0, size, size, null, 0, size);
+    }
+
+    /** Wide band out of the cover, with the top corners rounded to fit the card. */
+    private static int[] toBannerArgb(BufferedImage source) {
+        BufferedImage scaled = new BufferedImage(BANNER_WIDTH, BANNER_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = scaled.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        int cropHeight = Math.min(source.getHeight(), Math.round(source.getWidth() * BANNER_HEIGHT / (float) BANNER_WIDTH));
+        int cropTop = Math.round((source.getHeight() - cropHeight) * 0.45f);
+        graphics.drawImage(source, 0, 0, BANNER_WIDTH, BANNER_HEIGHT,
+                0, cropTop, source.getWidth(), cropTop + cropHeight, null);
         graphics.dispose();
 
-        int[] pixels = scaled.getRGB(0, 0, TEXTURE_SIZE, TEXTURE_SIZE, null, 0, TEXTURE_SIZE);
+        int[] pixels = scaled.getRGB(0, 0, BANNER_WIDTH, BANNER_HEIGHT, null, 0, BANNER_WIDTH);
+        for (int y = 0; y < BANNER_RADIUS; y++) {
+            for (int x = 0; x < BANNER_WIDTH; x++) {
+                float dx = Math.max(Math.max(BANNER_RADIUS - x - 0.5f, x + 0.5f - (BANNER_WIDTH - BANNER_RADIUS)), 0f);
+                if (dx == 0f) continue;
+                float dy = BANNER_RADIUS - y - 0.5f;
+                float distance = (float) Math.sqrt(dx * dx + dy * dy);
+                float coverage = Math.max(0f, Math.min(1f, BANNER_RADIUS + 0.5f - distance));
+                int index = y * BANNER_WIDTH + x;
+                int alpha = Math.round((pixels[index] >>> 24) * coverage);
+                pixels[index] = (alpha << 24) | (pixels[index] & 0x00FFFFFF);
+            }
+        }
+        return pixels;
+    }
+
+    /** Scales to {@link #TEXTURE_SIZE}, then feathers the corners into a rounded square. */
+    private static int[] toRoundedArgb(BufferedImage source) {
+        int[] pixels = square(source, TEXTURE_SIZE);
         for (int y = 0; y < TEXTURE_SIZE; y++) {
             for (int x = 0; x < TEXTURE_SIZE; x++) {
                 float coverage = cornerCoverage(x, y);

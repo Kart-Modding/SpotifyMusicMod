@@ -12,13 +12,17 @@ public final class Textures {
     }
 
     public static Identifier upload(String name, int[] argb, int size) {
+        return upload(name, argb, size, size);
+    }
+
+    public static Identifier upload(String name, int[] argb, int width, int height) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft == null) return null;
         try {
-            NativeImage image = new NativeImage(size, size, false);
-            for (int y = 0; y < size; y++) {
-                for (int x = 0; x < size; x++) {
-                    int color = argb[y * size + x];
+            NativeImage image = new NativeImage(width, height, false);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int color = argb[y * width + x];
                     //? if >=1.21.2 {
                     image.setPixel(x, y, color);
                     //?} else
