@@ -52,7 +52,7 @@ public class MoveScreen extends Screen {
     @Override
     protected void init() {
         WidgetRenderer.setHudHidden(true);
-        addRenderableOnly(new Painter(this::paint));
+        addRenderableOnly(new Painter((Painter.WithMouse) this::paint));
         reset = addRenderableWidget(Button.builder(Component.literal("Reset position"), button -> resetPosition())
                 .bounds(this.width / 2 - 102, 0, 100, 20).build());
         done = addRenderableWidget(Button.builder(Component.literal("Done"), button -> onClose())
@@ -72,7 +72,8 @@ public class MoveScreen extends Screen {
         return WidgetRenderer.box(this.width, this.height);
     }
 
-    private void paint(Canvas canvas) {
+    private void paint(Canvas canvas, int mouseX, int mouseY) {
+        followMouse(mouseX, mouseY);
         int centerX = this.width / 2;
         int centerY = this.height / 2 - 1;
         for (int y : new int[]{MARGIN, centerY, this.height - MARGIN}) {
@@ -157,10 +158,32 @@ public class MoveScreen extends Screen {
         return new double[]{start, -1};
     }
 
+    /**
+     * The widget follows the pointer from here, once per frame, so a drag only needs the press and
+     * the release. Other mods that hook into screens can swallow the drag events in between.
+     */
+    private void followMouse(int mouseX, int mouseY) {
+        if (dragging) drag(mouseX, mouseY, shiftDown());
+    }
+
+    private boolean overButton(int mouseX, int mouseY) {
+        return (reset.visible && reset.isMouseOver(mouseX, mouseY)) || (done.visible && done.isMouseOver(mouseX, mouseY));
+    }
+
+    private boolean shiftDown() {
+        //? if >=1.21.9 {
+        return this.minecraft.hasShiftDown();
+        //?} else
+        /*return hasShiftDown();*/
+    }
+
+    /** Runs before other click handling: a full-screen layer from another mod could take the click. */
     private boolean grab(double mouseX, double mouseY) {
         int[] box = box();
-        if (mouseX < box[0] - GRAB_MARGIN || mouseX >= box[2] + GRAB_MARGIN
-                || mouseY < box[1] - GRAB_MARGIN || mouseY >= box[3] + GRAB_MARGIN) return false;
+        boolean hit = !overButton((int) mouseX, (int) mouseY)
+                && mouseX >= box[0] - GRAB_MARGIN && mouseX < box[2] + GRAB_MARGIN
+                && mouseY >= box[1] - GRAB_MARGIN && mouseY < box[3] + GRAB_MARGIN;
+        if (!hit) return false;
         dragging = true;
         grabX = mouseX - box[0];
         grabY = mouseY - box[1];
@@ -208,15 +231,8 @@ public class MoveScreen extends Screen {
     //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (super.mouseClicked(event, doubleClick)) return true;
-        return event.button() == 0 && grab(event.x(), event.y());
-    }
-
-    @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!dragging) return super.mouseDragged(event, deltaX, deltaY);
-        drag(event.x(), event.y(), event.hasShiftDown());
-        return true;
+        if (event.button() == Screens.LEFT_BUTTON && grab(event.x(), event.y())) return true;
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
@@ -232,15 +248,8 @@ public class MoveScreen extends Screen {
     //?} else {
     /*@Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        return button == 0 && grab(mouseX, mouseY);
-    }
-
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (!dragging) return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        drag(mouseX, mouseY, hasShiftDown());
-        return true;
+        if (button == Screens.LEFT_BUTTON && grab(mouseX, mouseY)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override

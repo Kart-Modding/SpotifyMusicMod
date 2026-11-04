@@ -433,11 +433,6 @@ public final class WidgetRenderer {
                 int rowAlpha = Math.round(255 * alpha * fade * (float) Math.pow((i + 1) / 12f, 1.5));
                 canvas.rect(x, y + band - 10 + i, width, 1, argb(colorPanel, rowAlpha));
             }
-            int buttonX = x + width - 20;
-            int buttonY = y + band - 19;
-            Shapes.fill(canvas, buttonX, buttonY, 15, 15, 3, argb(colorBars, fullAlpha));
-            Shapes.fill(canvas, buttonX + 1, buttonY + 1, 13, 13, 3, argb(Theme.mix(colorPanel, 0x000000, 0.35f), fullAlpha));
-            playState(canvas, buttonX + 5, buttonY + 4, track.playing, argb(0xFFFFFF, fullAlpha));
         }
 
         int textY = bodyY + 5;

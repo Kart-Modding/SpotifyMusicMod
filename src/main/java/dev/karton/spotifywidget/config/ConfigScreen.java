@@ -662,7 +662,7 @@ public class ConfigScreen extends Screen {
     //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == 0 && grabBar(event.x(), event.y())) return true;
+        if (event.button() == Screens.LEFT_BUTTON && grabBar(event.x(), event.y())) return true;
         return super.mouseClicked(event, doubleClick);
     }
 
@@ -681,7 +681,7 @@ public class ConfigScreen extends Screen {
     //?} else {
     /*@Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && grabBar(mouseX, mouseY)) return true;
+        if (button == Screens.LEFT_BUTTON && grabBar(mouseX, mouseY)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
