@@ -35,3 +35,7 @@
 Also available on [Modrinth](https://modrinth.com/mod/spoty-widget). Source code on [GitHub](https://github.com/Kart-Modding/SpotifyMusicMod).
 
 Suggestions or problems? Open an [issue](https://github.com/Kart-Modding/SpotifyMusicMod/issues) or visit [my links](https://link.karton.dev/).
+
+## Creator
+
+[![Kartonekk: lifetime downloads on Modrinth and CurseForge](https://wsrv.nl/?url=github-mc-widget.vercel.app/api/badge/creator&output=png&maxage=1d)](https://github.com/kartonekk)

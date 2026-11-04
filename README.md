@@ -242,3 +242,7 @@ The infographics, their layered PSD files and the screenshots they use are in
 ## License
 
 See [LICENSE](LICENSE). Suggestions or problems? Open an issue or go to [link.karton.dev](https://link.karton.dev/).
+
+## Creator
+
+[![Kartonekk: lifetime downloads on Modrinth and CurseForge](https://github-mc-widget.vercel.app/api/badge/creator)](https://github.com/kartonekk)
