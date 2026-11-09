@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class WindowsMediaSource implements MediaSource {
     private static final String SCRIPT_RESOURCE = "/assets/spotifywidget/nowplaying.ps1";
+    private static final int MAX_LAUNCH_FAILURES = 3;
 
     private final AtomicReference<Track> track = new AtomicReference<>();
     private final AtomicReference<String> status = new AtomicReference<>("Starting");
@@ -84,6 +85,7 @@ public final class WindowsMediaSource implements MediaSource {
                 .encodeToString(script.getBytes(StandardCharsets.UTF_16LE));
 
         long backoffMillis = 2000;
+        int launchFailures = 0;
         while (running) {
             try {
                 ProcessBuilder builder = new ProcessBuilder(
@@ -93,8 +95,23 @@ public final class WindowsMediaSource implements MediaSource {
                 builder.environment().put("SPW_INTERVAL", String.valueOf(startedInterval));
                 builder.environment().put("SPW_PREFER_SPOTIFY", startedSpotifyOnly ? "1" : "0");
                 builder.redirectErrorStream(false);
-                Process started = builder.start();
+                Process started;
+                try {
+                    started = builder.start();
+                } catch (java.io.IOException e) {
+                    // PowerShell could not be launched at all (e.g. blocked by an antivirus). Retrying
+                    // forever would just trip the antivirus again every few seconds, so give up.
+                    if (++launchFailures >= MAX_LAUNCH_FAILURES) {
+                        status.set("Could not start PowerShell - switch the source to the Spotify Web API");
+                        SpotifyWidgetClient.LOGGER.warn("Could not start PowerShell ({}), giving up on the Windows media session."
+                                + " Switch the source to the Spotify Web API in the widget settings.", e.toString());
+                        running = false;
+                        return;
+                    }
+                    throw e;
+                }
                 process = started;
+                launchFailures = 0;
                 backoffMillis = 2000;
 
                 try (BufferedReader reader = new BufferedReader(
