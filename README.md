@@ -43,7 +43,7 @@ That is all the setup.
 
 | OS | Status | Source |
 |---|---|---|
-| **Windows** | ✅ Supported | Media session behind the volume flyout (SMTC), read by a bundled PowerShell helper |
+| **Windows** | ✅ Supported | Media session behind the volume flyout (SMTC), read by a bundled PowerShell helper, or directly through WinRT if PowerShell is blocked |
 | **Linux** | ✅ Supported | MPRIS player on D-Bus (`org.mpris.MediaPlayer2.spotify`), read by `gdbus`, with `playerctl` as a fallback |
 | **macOS** | ✅ Supported | Spotify (or Apple Music) asked through AppleScript via `osascript`. Allow Minecraft under System Settings → Privacy & Security → Automation the first time |
 
@@ -172,6 +172,9 @@ You can turn off the widget part and the pause part separately in the settings.
   `assets/spotifywidget/nowplaying.ps1`. The script prints one JSON line per poll. If the script stops,
   the mod restarts it with backoff. The encoded script is not affected by the execution policy, and
   nothing is written to disk.
+- If PowerShell cannot be started (some antiviruses block it), `media/WindowsNativeMedia` reads the same
+  media session directly through WinRT, using the JNA library Minecraft already ships. No process is
+  started on this path. Playback controls switch over too.
 - `media/LinuxMediaSource` calls `gdbus`/`playerctl` at the same interval.
 - `media/MacMediaSource` runs a short AppleScript through `/usr/bin/osascript` at the same interval.
   It checks that the player is running first, so polling never launches Spotify.

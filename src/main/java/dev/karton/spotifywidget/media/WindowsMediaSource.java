@@ -17,10 +17,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * Reads the Windows "now playing" session (the same data the volume flyout shows) through a small
  * PowerShell helper. No Spotify account, app registration or login involved - if the Spotify
  * desktop app is playing, Windows already knows the title, artist and position.
+ *
+ * <p>If PowerShell cannot be started (an antivirus blocking it is the usual reason), the same data is
+ * read directly through WinRT instead, see {@link WindowsNativeMedia}.
  */
 public final class WindowsMediaSource implements MediaSource {
     private static final String SCRIPT_RESOURCE = "/assets/spotifywidget/nowplaying.ps1";
-    private static final int MAX_LAUNCH_FAILURES = 3;
+    /** A helper that quits before printing anything this many times in a row counts as blocked. */
+    private static final int MAX_SILENT_EXITS = 2;
 
     private final AtomicReference<Track> track = new AtomicReference<>();
     private final AtomicReference<String> status = new AtomicReference<>("Starting");
@@ -85,8 +89,13 @@ public final class WindowsMediaSource implements MediaSource {
                 .encodeToString(script.getBytes(StandardCharsets.UTF_16LE));
 
         long backoffMillis = 2000;
-        int launchFailures = 0;
+        int silentExits = 0;
         while (running) {
+            if (WindowsNativeMedia.powershellBlocked()) {
+                runNativeLoop();
+                return;
+            }
+            boolean gotOutput = false;
             try {
                 ProcessBuilder builder = new ProcessBuilder(
                         powershell(), "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded);
@@ -99,25 +108,20 @@ public final class WindowsMediaSource implements MediaSource {
                 try {
                     started = builder.start();
                 } catch (java.io.IOException e) {
-                    // PowerShell could not be launched at all (e.g. blocked by an antivirus). Retrying
-                    // forever would just trip the antivirus again every few seconds, so give up.
-                    if (++launchFailures >= MAX_LAUNCH_FAILURES) {
-                        status.set("Could not start PowerShell - switch the source to the Spotify Web API");
-                        SpotifyWidgetClient.LOGGER.warn("Could not start PowerShell ({}), giving up on the Windows media session."
-                                + " Switch the source to the Spotify Web API in the widget settings.", e.toString());
-                        running = false;
-                        return;
-                    }
-                    throw e;
+                    // PowerShell could not be launched at all (e.g. blocked by an antivirus). Trying
+                    // again would only trip the antivirus again, so read the session natively instead.
+                    WindowsNativeMedia.markPowershellBlocked(e.getMessage());
+                    continue;
                 }
                 process = started;
-                launchFailures = 0;
                 backoffMillis = 2000;
 
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(started.getInputStream(), StandardCharsets.UTF_8))) {
                     String line;
                     while (running && (line = reader.readLine()) != null) {
+                        gotOutput = true;
+                        silentExits = 0;
                         handle(line);
                         if (settingsChanged()) break; // restart the helper with the new settings
                     }
@@ -129,12 +133,45 @@ public final class WindowsMediaSource implements MediaSource {
                 SpotifyWidgetClient.LOGGER.warn("Media session helper stopped: {}", e.toString());
             }
             if (!running) return;
+            // An antivirus may also let PowerShell start and then kill it straight away
+            if (!gotOutput && ++silentExits >= MAX_SILENT_EXITS) {
+                WindowsNativeMedia.markPowershellBlocked("the helper keeps exiting without output");
+                continue;
+            }
             try {
                 Thread.sleep(backoffMillis);
             } catch (InterruptedException e) {
                 return;
             }
             backoffMillis = Math.min(backoffMillis * 2, 30_000);
+        }
+    }
+
+    /** Polls the media session through WinRT, without starting any process. */
+    private void runNativeLoop() {
+        if (!WindowsNativeMedia.available()) {
+            status.set("Could not start PowerShell - switch the source to the Spotify Web API");
+            SpotifyWidgetClient.LOGGER.warn("Neither PowerShell nor the native media session works here."
+                    + " Switch the source to the Spotify Web API in the widget settings.");
+            running = false;
+            return;
+        }
+        int failures = 0;
+        while (running) {
+            JsonObject json = WindowsNativeMedia.poll(HudConfig.get().spotifyAppOnly);
+            handle(json);
+            if ("error".equals(string(json, "state"))) {
+                if (++failures == 5) {
+                    SpotifyWidgetClient.LOGGER.warn("Native media session keeps failing: {}", string(json, "message"));
+                }
+            } else {
+                failures = 0;
+            }
+            try {
+                Thread.sleep(Math.max(250, HudConfig.get().systemPollMillis));
+            } catch (InterruptedException e) {
+                return;
+            }
         }
     }
 
@@ -161,6 +198,10 @@ public final class WindowsMediaSource implements MediaSource {
         } catch (Exception e) {
             return;
         }
+        handle(json);
+    }
+
+    private void handle(JsonObject json) {
         String state = json.has("state") ? json.get("state").getAsString() : "error";
         if (!state.equals("ok")) {
             if (state.equals("none")) {
