@@ -14,8 +14,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Sends playback commands to the player the system already talks to. On Windows a small PowerShell
- * helper drives the media session (and the volume keys); on Linux the MPRIS player is called
- * directly; on macOS Spotify (or Apple Music) is told what to do through AppleScript. Nothing here
+ * helper drives the media session (and the volume keys), or WinRT is called directly when PowerShell
+ * is blocked; on Linux the MPRIS player is called directly; on macOS Spotify (or Apple Music) is told what to do through AppleScript. Nothing here
  * needs a Spotify account.
  */
 public final class MediaControl {
@@ -88,7 +88,18 @@ public final class MediaControl {
     // --- Windows ---------------------------------------------------------------
 
     private static void sendWindows(String command) throws Exception {
-        if (process == null || !process.isAlive()) startWindowsHelper();
+        if (!WindowsNativeMedia.powershellBlocked() && (process == null || !process.isAlive())) {
+            startWindowsHelper();
+        }
+        if (WindowsNativeMedia.powershellBlocked()) {
+            closeHelper();
+            if (!WindowsNativeMedia.available()) {
+                unavailable = true;
+                return;
+            }
+            WindowsNativeMedia.command(command, HudConfig.get().spotifyAppOnly);
+            return;
+        }
         if (commands == null) return;
         commands.write(command);
         commands.newLine();
@@ -109,7 +120,13 @@ public final class MediaControl {
                 powershell(), "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded);
         builder.environment().put("SPW_PREFER_SPOTIFY", HudConfig.get().spotifyAppOnly ? "1" : "0");
         builder.redirectErrorStream(true);
-        process = builder.start();
+        try {
+            process = builder.start();
+        } catch (java.io.IOException e) {
+            // PowerShell could not be launched (e.g. blocked by an antivirus): use WinRT from now on
+            WindowsNativeMedia.markPowershellBlocked(e.getMessage());
+            return;
+        }
         commands = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8));
 
         // Drain the helper's replies so its pipe never fills up
